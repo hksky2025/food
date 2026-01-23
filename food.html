@@ -5,67 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的私藏 FB 食譜庫</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen font-sans">
 
-    <!-- Navigation -->
-    <nav class="bg-white shadow-md p-4 mb-8">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-orange-600">🍳 食譜分析大師</h1>
-            <button id="addBtn" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600">新增食譜</button>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-orange-500 tracking-tight">🍳 RECIPE ANALYST</h1>
+            <span class="text-sm text-gray-400">GitHub + Firebase 實時同步</span>
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4">
-        <div id="recipe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- 食譜卡片會動態出現在這裡 -->
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 p-6">
-                <div class="animate-pulse flex space-x-4">
-                    <div class="flex-1 space-y-4 py-1">
-                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div class="space-y-2">
-                            <div class="h-4 bg-gray-200 rounded"></div>
-                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 統計與新增按鈕 -->
+        <div class="mb-8 flex justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">我的收藏清單</h2>
+                <p class="text-gray-500">點擊卡片查看詳細食材及教學影片</p>
+            </div>
+        </div>
+
+        <!-- 食譜網格 -->
+        <div id="recipe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 載入中狀態 -->
+            <div class="text-center col-span-full py-20 text-gray-400">
+                正在從 Firebase 讀取食譜...
             </div>
         </div>
     </main>
 
-    <!-- Recipe Detail Modal (隱藏) -->
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 text-2xl">&times;</button>
-            <div id="modal-content"></div>
+    <!-- 詳情 Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+            <div id="modal-content">
+                <!-- 內容動態填充 -->
+            </div>
         </div>
     </div>
 
     <script>
-        // 這裡稍後會填入你的 Firebase 配置
-        // const firebaseConfig = { ... };
-        // firebase.initializeApp(firebaseConfig);
-        // const db = firebase.firestore();
+        // ======= 這裡替換成你的 Firebase 配置 =======
+        const firebaseConfig = {
+            apiKey: "AIzaSyBB-oyBKoTYNHy60C9tMOkYA4HFuSsypr8",
+            authDomain: "food-97698.firebaseapp.com",
+            projectId: "food-97698",
+            storageBucket: "food-97698.firebasestorage.app",
+            messagingSenderId: "1026575280660",
+            appId: "1:1026575280660:web:e141380a8d0e3df5f55501"
+        };
+        // ==========================================
 
-        // 模擬數據渲染函數 (當你抓到資料後)
-        function renderRecipes(recipes) {
+        // 初始化 Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 讀取資料並監聽更新
+        db.collection("recipes").orderBy("createdAt", "desc").onSnapshot((querySnapshot) => {
             const grid = document.getElementById('recipe-grid');
-            grid.innerHTML = recipes.map(recipe => `
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer" onclick="showDetail('${recipe.id}')">
-                    <div class="p-5">
-                        <h3 class="text-xl font-bold mb-2">${recipe.title}</h3>
-                        <p class="text-gray-600 text-sm line-clamp-2">食材：${recipe.ingredients.map(i => i.name).join(', ')}</p>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="text-orange-500 font-semibold text-sm">點擊查看詳情</span>
-                            <a href="${recipe.fbLink}" target="_blank" class="text-blue-500 text-sm underline">觀看影片</a>
+            if (querySnapshot.empty) {
+                grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400">目前還沒有食譜，請給我 FB 連結來新增第一個！</div>';
+                return;
+            }
+
+            let html = '';
+            querySnapshot.forEach((doc) => {
+                const recipe = doc.data();
+                const id = doc.id;
+                html += `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer" onclick='showDetail(${JSON.stringify(recipe)})'>
+                        <div class="p-6">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span class="bg-orange-100 text-orange-600 text-xs font-bold px-2.5 py-1 rounded-full uppercase">${recipe.category || '家常菜'}</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">${recipe.title}</h3>
+                            <p class="text-gray-500 text-sm line-clamp-2 mb-4">食材：${recipe.ingredients.map(i => i.name).join('、')}</p>
+                            <div class="flex justify-between items-center border-t pt-4">
+                                <span class="text-orange-500 text-sm font-medium">查看食譜分析 →</span>
+                                <a href="${recipe.fbLink}" target="_blank" onclick="event.stopPropagation();" class="text-blue-500 hover:underline text-sm">原始影片</a>
+                            </div>
                         </div>
                     </div>
+                `;
+            });
+            grid.innerHTML = html;
+        });
+
+        // 顯示詳情
+        function showDetail(recipe) {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">${recipe.title}</h2>
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-orange-500 mb-2">🛒 準備食材</h3>
+                    <ul class="grid grid-cols-2 gap-2">
+                        ${recipe.ingredients.map(i => `<li class="bg-gray-50 p-2 rounded text-gray-700"><b>${i.name}</b>: ${i.amount}</li>`).join('')}
+                    </ul>
                 </div>
-            `).join('');
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-orange-500 mb-2">👨‍🍳 烹飪步驟</h3>
+                    <div class="space-y-3 text-gray-700 leading-relaxed">
+                        ${recipe.steps.map((s, index) => `<p><span class="font-bold text-orange-300 mr-2">${index + 1}.</span>${s}</p>`).join('')}
+                    </div>
+                </div>
+                <div class="mt-8 border-t pt-4">
+                    <a href="${recipe.fbLink}" target="_blank" class="block text-center bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">前往 Facebook 觀看教學影片</a>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
         }
     </script>
 </body>
