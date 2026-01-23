@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的私藏 FB 食譜庫</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md p-4 mb-8">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-orange-600">🍳 食譜分析大師</h1>
+            <button id="addBtn" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600">新增食譜</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4">
+        <div id="recipe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 食譜卡片會動態出現在這裡 -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 p-6">
+                <div class="animate-pulse flex space-x-4">
+                    <div class="flex-1 space-y-4 py-1">
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div class="space-y-2">
+                            <div class="h-4 bg-gray-200 rounded"></div>
+                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Recipe Detail Modal (隱藏) -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 text-2xl">&times;</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 這裡稍後會填入你的 Firebase 配置
+        // const firebaseConfig = { ... };
+        // firebase.initializeApp(firebaseConfig);
+        // const db = firebase.firestore();
+
+        // 模擬數據渲染函數 (當你抓到資料後)
+        function renderRecipes(recipes) {
+            const grid = document.getElementById('recipe-grid');
+            grid.innerHTML = recipes.map(recipe => `
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer" onclick="showDetail('${recipe.id}')">
+                    <div class="p-5">
+                        <h3 class="text-xl font-bold mb-2">${recipe.title}</h3>
+                        <p class="text-gray-600 text-sm line-clamp-2">食材：${recipe.ingredients.map(i => i.name).join(', ')}</p>
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="text-orange-500 font-semibold text-sm">點擊查看詳情</span>
+                            <a href="${recipe.fbLink}" target="_blank" class="text-blue-500 text-sm underline">觀看影片</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
