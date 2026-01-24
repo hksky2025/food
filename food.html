@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小廚料理手帳 (Firebase Cloud Edition)</title>
+    <title>小廚料理手帳 (Firebase Auto-Compress)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -74,9 +74,7 @@
             console.error("Firebase 初始化失敗 (請檢查 Config)", e);
         }
 
-        // 將 Firebase 功能掛載到 window 對象，讓 React (Babel) 可以呼叫
         window.db_api = {
-            // 讀取所有食譜
             list: async () => {
                 if (!db) return [];
                 const querySnapshot = await getDocs(collection(db, "recipes"));
@@ -86,19 +84,15 @@
                 });
                 return recipes;
             },
-            // 儲存/更新食譜 (使用 id 作為文件名稱)
             save: async (recipe) => {
                 if (!db) throw new Error("Database not connected");
                 await setDoc(doc(db, "recipes", recipe.id), recipe);
             },
-            // 刪除食譜
             delete: async (id) => {
                 if (!db) throw new Error("Database not connected");
                 await deleteDoc(doc(db, "recipes", id));
             }
         };
-        
-        // 通知 React 應用程式 API 已就緒
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
 
@@ -127,6 +121,7 @@
             const [editMode, setEditMode] = useState(false);
             const [imagePreview, setImagePreview] = useState(null);
             const [isLoading, setIsLoading] = useState(false);
+            const [processingImage, setProcessingImage] = useState(false); // 新增圖片處理狀態
             
             const [formData, setFormData] = useState({
                 name: '',
@@ -158,43 +153,74 @@
             const loadRecipes = async () => {
                 setIsLoading(true);
                 try {
-                    // 等待 Firebase 準備好
                     if (window.db_api) {
                         const data = await window.db_api.list();
                         setRecipes(data.sort((a, b) => b.timestamp - a.timestamp));
-                    } else {
-                        console.log("Firebase API not ready yet...");
                     }
                 } catch (error) {
                     console.error('Loading Error:', error);
-                    alert("讀取失敗，請檢查 API Key");
                 }
                 setIsLoading(false);
             };
 
             useEffect(() => {
-                // 嘗試讀取
                 loadRecipes();
-                
-                // 監聽 Firebase 就緒事件 (防止 React 比 Firebase 早跑)
                 window.addEventListener('firebase-ready', loadRecipes);
                 return () => window.removeEventListener('firebase-ready', loadRecipes);
             }, []);
 
-            const handleImageUpload = (e) => {
+            // 🌟 圖片自動壓縮魔法函數 🌟
+            const compressImage = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = () => {
+                            // 建立一個 Canvas 來壓縮
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 800; // 限制最大寬度為 800px
+                            
+                            // 計算等比例高度
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // 輸出為 JPEG，品質設定為 0.6 (60%)
+                            // 這會大幅減少檔案大小，通常會小於 100KB
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                            resolve(dataUrl);
+                        };
+                        img.onerror = (err) => reject(err);
+                    };
+                    reader.onerror = (err) => reject(err);
+                });
+            };
+
+            const handleImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    // 🚨 Firebase Firestore 單一文件限制 1MB，這裡設定 0.8MB 安全線
-                    if (file.size > 800 * 1024) {
-                        alert('圖片太大啦！因為資料庫限制，請用 800KB 以下的圖片 🙏');
-                        return;
+                    setProcessingImage(true); // 顯示處理中
+                    try {
+                        // 使用壓縮魔法
+                        const compressedDataUrl = await compressImage(file);
+                        setImagePreview(compressedDataUrl);
+                        setFormData(prev => ({...prev, image: compressedDataUrl}));
+                    } catch (error) {
+                        console.error("Image processing error", error);
+                        alert("圖片處理失敗，請試試看別張照片 > <");
                     }
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setImagePreview(reader.result);
-                        setFormData({...formData, image: reader.result});
-                    };
-                    reader.readAsDataURL(file);
+                    setProcessingImage(false);
                 }
             };
 
@@ -222,7 +248,8 @@
                     resetForm();
                 } catch (error) {
                     console.error(error);
-                    alert('儲存失敗！可能是圖片太大超過了資料庫限制 (1MB)。');
+                    // 萬一還是太大 (極低機率)，會顯示這個
+                    alert('哎呀！這張照片就算壓縮了還是太大 (超過1MB)，請換一張照片試試看！');
                 }
                 setIsLoading(false);
             };
@@ -381,8 +408,8 @@
                                                 <label className="relative cursor-pointer group w-full">
                                                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                                                     <div className={`w-full h-72 rounded-[2.5rem] overflow-hidden border-4 border-dashed ${imagePreview ? 'border-transparent' : 'border-[#d7ccc8] bg-[#fbe9e7]'} transition-all flex items-center justify-center relative hover:border-[#ffab91] hover:bg-[#ffccbc]/30`}>
-                                                        {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover opacity-90" /> : <div className="text-center p-10"><Camera className="w-14 h-14 text-[#ffab91] mx-auto mb-4 animate-pulse" /><p className="text-[#d84315] font-bold text-lg">貼上料理照片！</p><p className="text-[#8d6e63] text-sm mt-2">像拍立得一樣紀錄下來<br/>(最大 800KB)</p></div>}
-                                                        {imagePreview && <div className="absolute inset-0 bg-[#5d4037]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-[2.5rem]"><span className="bg-[#fffcf7] px-6 py-3 rounded-full text-lg font-bold shadow-lg text-[#5d4037] hand-drawn-border">更換照片 📸</span></div>}
+                                                        {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover opacity-90" /> : <div className="text-center p-10"><Camera className="w-14 h-14 text-[#ffab91] mx-auto mb-4 animate-pulse" /><p className="text-[#d84315] font-bold text-lg">{processingImage ? '正在魔法壓縮中...' : '貼上料理照片！'}</p><p className="text-[#8d6e63] text-sm mt-2">{processingImage ? '✨✨✨' : '會自動幫你縮小照片喔'}</p></div>}
+                                                        {imagePreview && !processingImage && <div className="absolute inset-0 bg-[#5d4037]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-[2.5rem]"><span className="bg-[#fffcf7] px-6 py-3 rounded-full text-lg font-bold shadow-lg text-[#5d4037] hand-drawn-border">更換照片 📸</span></div>}
                                                     </div>
                                                 </label>
                                             </div>
@@ -408,7 +435,7 @@
                                                     <div className="absolute -top-3 right-10 bg-[#ffab91] w-4 h-12 rounded-full border-2 border-[#e64a19] shadow-md -rotate-6 pointer-events-none"></div>
                                                 </div>
                                             </div>
-                                            <button onClick={saveRecipe} disabled={isLoading} className="w-full bg-[#ffab91] text-[#5d4037] font-bold text-xl py-5 rounded-[2rem] hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 flex items-center justify-center gap-3">
+                                            <button onClick={saveRecipe} disabled={isLoading || processingImage} className="w-full bg-[#ffab91] text-[#5d4037] font-bold text-xl py-5 rounded-[2rem] hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 flex items-center justify-center gap-3">
                                                 <span>{editMode ? '修改完成！' : '放入手帳！'}</span><span className="text-2xl animate-bounce">🎉</span>
                                             </button>
                                         </div>
