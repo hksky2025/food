@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小廚料理手帳 (Auto-Wrap)</title>
+    <title>小廚料理手帳 (Category Synced)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -123,7 +123,7 @@
         const Edit2 = ({ className }) => <IconBase className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></IconBase>;
         const ChefHat = ({ className }) => <IconBase className={className}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"></path><line x1="6" y1="17" x2="20" y2="17"></line></IconBase>;
         const Camera = ({ className }) => <IconBase className={className}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
-        const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z"/></IconBase>;
+        const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>;
 
         function RecipeManager() {
             const [recipes, setRecipes] = useState([]);
@@ -136,23 +136,23 @@
             
             const [activeCategory, setActiveCategory] = useState('全部');
             
-            const [formData, setFormData] = useState({
-                name: '',
-                fbLink: '',
-                ingredients: '',
-                category: '家常小菜', 
-                cookingTime: '',
-                difficulty: '中等',
-                image: null
-            });
-
-            // 調整後的分類
+            // 🌟 核心分類清單 (主頁篩選 和 新增表單 共用此清單)
             const categories = [
                 '家常小菜', '肉類料理', '海鮮料理', '蔬菜/素食', 
                 '湯水/糖水', '粉麵飯(主食)', '快速料理(15分)', 
                 '減脂/健康', '早餐/烘焙', '日韓料理', '西式料理', '其他'
             ];
             
+            const [formData, setFormData] = useState({
+                name: '',
+                fbLink: '',
+                ingredients: '',
+                category: categories[0], // 預設選中第一個分類
+                cookingTime: '',
+                difficulty: '中等',
+                image: null
+            });
+
             const difficulties = ['簡單', '中等', '困難'];
 
             const convertToTraditional = async (text, field) => {
@@ -282,7 +282,7 @@
                     name: '',
                     fbLink: '',
                     ingredients: '',
-                    category: '家常小菜',
+                    category: categories[0], // 重置時也回到預設值
                     cookingTime: '',
                     difficulty: '中等',
                     image: null
@@ -297,7 +297,7 @@
                     name: recipe.name,
                     fbLink: recipe.fbLink,
                     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients.join('\n') : recipe.ingredients,
-                    category: recipe.category,
+                    category: recipe.category || categories[0], // 確保舊資料也有分類
                     cookingTime: recipe.cookingTime,
                     difficulty: recipe.difficulty,
                     image: recipe.image
@@ -354,7 +354,7 @@
                                 </button>
                             </div>
 
-                            {/* 🌟 修正後的篩選 Bar：使用 flex-wrap 自動換行，不再隱藏 */}
+                            {/* 🌟 主頁面篩選按鈕 (Filter Bar) */}
                             <div className="flex flex-wrap gap-2 pb-2 pt-1">
                                 <button
                                     onClick={() => setActiveCategory('全部')}
@@ -471,7 +471,18 @@
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                <div className="relative"><label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">類別</label><select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-5 py-3 bg-[#fff8e1] rounded-xl outline-none border-2 border-[#ffe0b2] cursor-pointer font-bold text-[#5d4037] appearance-none">{categories.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+                                                {/* 🌟 這裡就是你要的分類選擇器 🌟 */}
+                                                <div className="relative">
+                                                    <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">類別 (決定主頁篩選)</label>
+                                                    <select 
+                                                        value={formData.category} 
+                                                        onChange={(e) => setFormData({...formData, category: e.target.value})} 
+                                                        className="w-full px-5 py-3 bg-[#fff8e1] rounded-xl outline-none border-2 border-[#ffe0b2] cursor-pointer font-bold text-[#5d4037] appearance-none"
+                                                    >
+                                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                                    </select>
+                                                </div>
+                                                
                                                 <div className="relative"><label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">難度</label><select value={formData.difficulty} onChange={(e) => setFormData({...formData, difficulty: e.target.value})} className="w-full px-5 py-3 bg-[#efebe0] rounded-xl outline-none border-2 border-[#e0d8c8] cursor-pointer font-bold text-[#5d4037] appearance-none">{difficulties.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
                                                 <div><label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">時間</label><input value={formData.cookingTime} onChange={(e) => setFormData({...formData, cookingTime: e.target.value})} placeholder="例如 15分鐘" className="w-full px-5 py-3 bg-[#e8f5e9] rounded-xl outline-none border-2 border-[#c8e6c9] font-bold text-[#2e7d32] placeholder-[#a5d6a7] col-span-2 md:col-span-1" /></div>
                                             </div>
