@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小廚手帳">
+    
     <title>小廚料理手帳</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,8 +18,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.min.js"></script>
 
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='2' dy='4' stdDeviation='4' flood-color='%23e0d0b0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%23fffcf7'/%3E%3Ccircle cx='256' cy='256' r='220' fill='%23fff5e0' filter='url(%23shadow)'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23ffeec0' opacity='0.4'/%3E%3Cg transform='translate(106, 126) scale(1.2)'%3E%3Cpath d='M18 21h-3a4 4 0 0 1-3.7-2.4 5 5 0 0 1 .7-5.6 5 5 0 0 1 8.1 0 5 5 0 0 1 .8 5.6A4 4 0 0 1 18 21zm-10.6-2a4 4 0 0 1-.4-1.2 5 5 0 0 1 8 0 4 4 0 0 1-.4 1.2' fill='none' stroke='%23d84315' stroke-width='24' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 17 L20 17' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3C/g%3E%3Cpath d='M420 80 L435 125 L480 125 L445 155 L460 200 L420 170 L380 200 L395 155 L360 125 L405 125 Z' fill='%23fdd835' stroke='%23f9a825' stroke-width='8' stroke-linejoin='round' transform='rotate(15, 420, 140)' filter='url(%23shadow)'/%3E%3C/svg%3E">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='2' dy='4' stdDeviation='4' flood-color='%23e0d0b0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%23fffcf7'/%3E%3Ccircle cx='256' cy='256' r='220' fill='%23fff5e0' filter='url(%23shadow)'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23ffeec0' opacity='0.4'/%3E%3Cg transform='translate(106, 126) scale(1.2)'%3E%3Cpath d='M18 21h-3a4 4 0 0 1-3.7-2.4 5 5 0 0 1 .7-5.6 5 5 0 0 1 8.1 0 5 5 0 0 1 .8 5.6A4 4 0 0 1 18 21zm-10.6-2a4 4 0 0 1-.4-1.2 5 5 0 0 1 8 0 4 4 0 0 1-.4 1.2' fill='none' stroke='%23d84315' stroke-width='24' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 17 L20 17' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3C/g%3E%3Cpath d='M420 80 L435 125 L480 125 L445 155 L460 200 L420 170 L380 200 L395 155 L360 125 L405 125 Z' fill='%23fdd835' stroke='%23f9a825' stroke-width='8' stroke-linejoin='round' transform='rotate(15, 420, 140)' filter='url(%23shadow)'/%3E%3C/svg%3E">
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
@@ -26,15 +28,16 @@
             font-family: 'Zen Maru Gothic', 'Microsoft JhengHei', sans-serif;
             background-color: #fffcf7; 
             color: #5c4a4a; 
-            /* 防止 iOS 橡皮筋效果 */
-            overscroll-behavior-y: none;
+            overscroll-behavior-y: none; /* 防止 iOS 橡皮筋效果 */
         }
         
+        /* 自定義捲軸 */
         ::-webkit-scrollbar { width: 12px; }
         ::-webkit-scrollbar-track { background: #fffcf7; border-left: 2px solid #efebe0; }
         ::-webkit-scrollbar-thumb { background: #e8d7c0; border-radius: 10px; border: 3px solid #fffcf7; }
         ::-webkit-scrollbar-thumb:hover { background: #dcbca0; }
         
+        /* 手繪風格邊框 */
         .hand-drawn-border {
             border: 3px solid #eaddca; 
             box-shadow: 4px 4px 0px 0px #f4eee0; 
@@ -54,12 +57,15 @@
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
         }
 
+        /* 漂浮動畫 */
         @keyframes float-warm {
             0% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-8px) rotate(2deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
         .animate-float-warm { animation: float-warm 4s ease-in-out infinite; }
+        
+        /* 標題特效 */
         .title-text { text-shadow: 2px 2px 0px #fff, 4px 4px 0px #f2e6d8; }
     </style>
 </head>
@@ -92,6 +98,7 @@
             console.error("Firebase 初始化失敗 (請檢查 Config)", e);
         }
 
+        // 定義全域 API
         window.db_api = {
             list: async () => {
                 if (!db) return [];
@@ -111,6 +118,7 @@
                 await deleteDoc(doc(db, "recipes", id));
             }
         };
+        // 通知 React 啟動
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
 
@@ -141,9 +149,10 @@
             const [isLoading, setIsLoading] = useState(false);
             const [processingImage, setProcessingImage] = useState(false);
             
+            // 當前篩選的分類 (預設全部)
             const [activeCategory, setActiveCategory] = useState('全部');
             
-            // 🌟 核心分類清單 (主頁篩選 和 新增表單 共用此清單)
+            // 🌟 核心分類清單 (主頁篩選 和 新增表單 共用)
             const categories = [
                 '家常小菜', '肉類料理', '海鮮料理', '蔬菜/素食', 
                 '湯水/糖水', '粉麵飯(主食)', '快速料理(15分)', 
@@ -162,6 +171,7 @@
 
             const difficulties = ['簡單', '中等', '困難'];
 
+            // 簡繁轉換
             const convertToTraditional = async (text, field) => {
                 if (!text) return;
                 try {
@@ -177,6 +187,7 @@
                 }
             };
 
+            // 讀取資料
             const loadRecipes = async () => {
                 setIsLoading(true);
                 try {
@@ -196,6 +207,7 @@
                 return () => window.removeEventListener('firebase-ready', loadRecipes);
             }, []);
 
+            // 圖片壓縮
             const compressImage = (file) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -216,6 +228,7 @@
                             canvas.height = height;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
+                            // 壓縮為 0.6 品質
                             const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                             resolve(dataUrl);
                         };
@@ -265,7 +278,7 @@
                     resetForm();
                 } catch (error) {
                     console.error(error);
-                    alert('儲存失敗！可能是圖片太大超過了資料庫限制 (1MB)。');
+                    alert('儲存失敗！可能是圖片太大，或者網路連線問題。');
                 }
                 setIsLoading(false);
             };
@@ -327,6 +340,7 @@
                 return gradients[index % 3];
             };
 
+            // 篩選邏輯
             const filteredRecipes = activeCategory === '全部' 
                 ? recipes 
                 : recipes.filter(r => r.category === activeCategory);
@@ -361,7 +375,7 @@
                                 </button>
                             </div>
 
-                            {/* 🌟 主頁面篩選按鈕 (Filter Bar) */}
+                            {/* 🌟 篩選 Bar (自動換行) */}
                             <div className="flex flex-wrap gap-2 pb-2 pt-1">
                                 <button
                                     onClick={() => setActiveCategory('全部')}
@@ -421,14 +435,15 @@
                                                             <span className="text-5xl opacity-50">🍥</span>
                                                         </div>
                                                     )}
+                                                    {/* 顯示分類標籤 */}
                                                     <div className="absolute bottom-2 right-2 bg-[#fffcf7] px-2 py-1 rounded-full text-xs border border-[#efebe0] shadow-sm">
-                                                        私房料理
+                                                        {recipe.category || '私房料理'}
                                                     </div>
                                                 </div>
                                                 <div className="px-6 pb-6 pt-3 flex-1 flex flex-col">
                                                     <h3 className="text-xl font-bold text-[#5d4037] mb-3 group-hover:text-[#d84315] transition-colors line-clamp-1 title-text">{recipe.name}</h3>
                                                     <div className="flex flex-wrap gap-2 mb-5">
-                                                        <span className={`text-xs px-3 py-1.5 rounded-full border-2 font-bold ${getCategoryColor(recipe.category)}`}>{recipe.category}</span>
+                                                        <span className={`text-xs px-3 py-1.5 rounded-full border-2 font-bold ${getCategoryColor(recipe.category)}`}>{recipe.category || '未分類'}</span>
                                                         <span className="bg-[#efebe0] text-[#8d6e63] text-xs px-3 py-1.5 rounded-full border-2 border-[#e0d8c8] font-bold">難度: {recipe.difficulty}</span>
                                                     </div>
                                                     <div className="mt-auto pt-4 border-t-2 border-[#efebe0]/60 flex justify-between text-sm text-[#8d6e63] font-bold">
@@ -478,9 +493,9 @@
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                {/* 🌟 這裡就是你要的分類選擇器 🌟 */}
+                                                {/* 🌟 核心：使用同一份 categories 清單 🌟 */}
                                                 <div className="relative">
-                                                    <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">類別 (決定主頁篩選)</label>
+                                                    <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">類別 (決定篩選)</label>
                                                     <select 
                                                         value={formData.category} 
                                                         onChange={(e) => setFormData({...formData, category: e.target.value})} 
