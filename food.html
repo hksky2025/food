@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小廚料理手帳 (Firebase Auto-Compress)</title>
+    <title>小廚料理手帳 (Filter Edition)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -22,10 +22,20 @@
             background-color: #fffcf7; 
             color: #5c4a4a; 
         }
+        /* 隱藏橫向捲軸但保留功能 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
         ::-webkit-scrollbar { width: 12px; }
         ::-webkit-scrollbar-track { background: #fffcf7; border-left: 2px solid #efebe0; }
         ::-webkit-scrollbar-thumb { background: #e8d7c0; border-radius: 10px; border: 3px solid #fffcf7; }
         ::-webkit-scrollbar-thumb:hover { background: #dcbca0; }
+        
         .hand-drawn-border {
             border: 3px solid #eaddca; 
             box-shadow: 4px 4px 0px 0px #f4eee0; 
@@ -36,6 +46,15 @@
             box-shadow: 6px 6px 0px 0px #f4eee0;
             border-color: #e0cdaf;
         }
+        
+        /* 篩選按鈕激活狀態 */
+        .category-btn-active {
+            background-color: #ffab91;
+            color: #5d4037;
+            border-color: #ff8a65;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
         @keyframes float-warm {
             0% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-8px) rotate(2deg); }
@@ -113,6 +132,7 @@
         const ChefHat = ({ className }) => <IconBase className={className}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"></path><line x1="6" y1="17" x2="20" y2="17"></line></IconBase>;
         const Camera = ({ className }) => <IconBase className={className}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
         const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>;
+        const Search = ({ className }) => <IconBase className={className}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></IconBase>;
 
         function RecipeManager() {
             const [recipes, setRecipes] = useState([]);
@@ -121,19 +141,31 @@
             const [editMode, setEditMode] = useState(false);
             const [imagePreview, setImagePreview] = useState(null);
             const [isLoading, setIsLoading] = useState(false);
-            const [processingImage, setProcessingImage] = useState(false); // 新增圖片處理狀態
+            const [processingImage, setProcessingImage] = useState(false);
+            
+            // 🌟 新增：當前選擇的分類
+            const [activeCategory, setActiveCategory] = useState('全部');
             
             const [formData, setFormData] = useState({
                 name: '',
                 fbLink: '',
                 ingredients: '',
-                category: '中菜',
+                category: '家常小菜', // 預設值
                 cookingTime: '',
                 difficulty: '中等',
                 image: null
             });
 
-            // 簡繁轉換
+            // 🌟 優化後的分類清單
+            const categories = [
+                '家常小菜', '肉類料理', '海鮮料理', '蔬菜/素食', 
+                '湯水/糖水', '粉麵飯(主食)', '快速料理(15分)', 
+                '減脂/健康', '早餐/烘焙', '日韓料理', '西式料理', '其他'
+            ];
+            
+            const difficulties = ['簡單', '中等', '困難'];
+
+            // OpenCC 轉換
             const convertToTraditional = async (text, field) => {
                 if (!text) return;
                 try {
@@ -149,7 +181,6 @@
                 }
             };
 
-            // 讀取資料
             const loadRecipes = async () => {
                 setIsLoading(true);
                 try {
@@ -169,7 +200,6 @@
                 return () => window.removeEventListener('firebase-ready', loadRecipes);
             }, []);
 
-            // 🌟 圖片自動壓縮魔法函數 🌟
             const compressImage = (file) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -178,26 +208,18 @@
                         const img = new Image();
                         img.src = event.target.result;
                         img.onload = () => {
-                            // 建立一個 Canvas 來壓縮
                             const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 800; // 限制最大寬度為 800px
-                            
-                            // 計算等比例高度
+                            const MAX_WIDTH = 800;
                             let width = img.width;
                             let height = img.height;
                             if (width > MAX_WIDTH) {
                                 height *= MAX_WIDTH / width;
                                 width = MAX_WIDTH;
                             }
-                            
                             canvas.width = width;
                             canvas.height = height;
-                            
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
-                            
-                            // 輸出為 JPEG，品質設定為 0.6 (60%)
-                            // 這會大幅減少檔案大小，通常會小於 100KB
                             const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                             resolve(dataUrl);
                         };
@@ -210,9 +232,8 @@
             const handleImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    setProcessingImage(true); // 顯示處理中
+                    setProcessingImage(true);
                     try {
-                        // 使用壓縮魔法
                         const compressedDataUrl = await compressImage(file);
                         setImagePreview(compressedDataUrl);
                         setFormData(prev => ({...prev, image: compressedDataUrl}));
@@ -248,8 +269,7 @@
                     resetForm();
                 } catch (error) {
                     console.error(error);
-                    // 萬一還是太大 (極低機率)，會顯示這個
-                    alert('哎呀！這張照片就算壓縮了還是太大 (超過1MB)，請換一張照片試試看！');
+                    alert('儲存失敗！可能是圖片太大超過了資料庫限制 (1MB)。');
                 }
                 setIsLoading(false);
             };
@@ -273,7 +293,7 @@
                     name: '',
                     fbLink: '',
                     ingredients: '',
-                    category: '中菜',
+                    category: '家常小菜',
                     cookingTime: '',
                     difficulty: '中等',
                     image: null
@@ -299,12 +319,10 @@
                 setShowModal(true);
             };
 
-            const categories = ['中菜', '西餐', '日韓料理', '甜品', '小食', '湯水', '減肥餐 - 早餐', '減肥餐 - 中餐', '減肥餐 - 西餐', '減肥餐 - 沙律', '減肥餐 - 日餐', '其他'];
-            const difficulties = ['簡單', '中等', '困難'];
-
             const getCategoryColor = (category) => {
-                if (category && category.includes('減肥餐')) return 'bg-[#e8f5e9] text-[#558b2f] border-[#c8e6c9]';
-                if (category === '甜品') return 'bg-[#fffde7] text-[#fbc02d] border-[#fff59d]';
+                if (category && category.includes('減脂')) return 'bg-[#e8f5e9] text-[#558b2f] border-[#c8e6c9]';
+                if (category && category.includes('甜')) return 'bg-[#fffde7] text-[#fbc02d] border-[#fff59d]';
+                if (category && category.includes('湯')) return 'bg-[#e0f7fa] text-[#0097a7] border-[#b2ebf2]';
                 return 'bg-[#ffebee] text-[#d32f2f] border-[#ffcdd2]';
             };
 
@@ -313,40 +331,72 @@
                 return gradients[index % 3];
             };
 
+            // 🌟 篩選邏輯
+            const filteredRecipes = activeCategory === '全部' 
+                ? recipes 
+                : recipes.filter(r => r.category === activeCategory);
+
             return (
                 <div className="min-h-screen pb-20 font-medium text-[#5c4a4a]">
-                    {/* 背景漂浮裝飾 */}
+                    {/* 裝飾 */}
                     <div className="fixed top-10 left-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍳</div>
                     <div className="fixed bottom-20 right-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '1s'}}>🥘</div>
                     
                     {/* Header */}
-                    <div className="bg-[#fffcf7]/90 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-[0_2px_10px_-5px_#eaddca]">
-                        <div className="max-w-5xl mx-auto px-6 py-6 relative z-10 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-[#ffe0b2] p-3 rounded-full relative hand-drawn-border">
-                                    <ChefHat className="w-9 h-9 text-[#d84315]" />
-                                    <div className="absolute -top-2 -right-2 text-2xl animate-bounce">⭐</div>
-                                </div>
-                                <div>
-                                    <h1 className="text-3xl font-bold tracking-wider title-text text-[#5d4037]">小廚料理手帳</h1>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-[#8d6e63] text-sm font-bold mt-2 flex items-center gap-1">
-                                            <span>記錄專屬的美味回憶</span>
-                                            <span>😋</span>
-                                        </p>
-                                        {isLoading && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded animate-pulse">雲端同步中...</span>}
+                    <div className="bg-[#fffcf7]/95 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-sm">
+                        <div className="max-w-5xl mx-auto px-6 pt-6 pb-2 relative z-10">
+                            {/* Logo & Add Button */}
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-[#ffe0b2] p-3 rounded-full relative hand-drawn-border">
+                                        <ChefHat className="w-9 h-9 text-[#d84315]" />
+                                        <div className="absolute -top-2 -right-2 text-2xl animate-bounce">⭐</div>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-3xl font-bold tracking-wider title-text text-[#5d4037]">小廚料理手帳</h1>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-[#8d6e63] text-sm font-bold mt-1">記錄專屬的美味回憶 😋</p>
+                                            {isLoading && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded animate-pulse">更新中...</span>}
+                                        </div>
                                     </div>
                                 </div>
+                                <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-[#ffab91] text-[#5d4037] px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95">
+                                    <Plus className="w-6 h-6" />
+                                    <span className="hidden md:inline text-lg">紀錄美食</span>
+                                </button>
                             </div>
-                            <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-[#ffab91] text-[#5d4037] px-6 py-3 rounded-full font-bold hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95">
-                                <Plus className="w-6 h-6" />
-                                <span className="hidden md:inline text-lg">紀錄美食</span>
-                            </button>
+
+                            {/* 🌟 篩選 Bar (可橫向滑動) */}
+                            <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 pt-1 -mx-2 px-2">
+                                <button
+                                    onClick={() => setActiveCategory('全部')}
+                                    className={`whitespace-nowrap px-4 py-2 rounded-full border-2 font-bold transition-all ${
+                                        activeCategory === '全部' 
+                                        ? 'category-btn-active' 
+                                        : 'bg-[#fff] border-[#efebe0] text-[#8d6e63] hover:bg-[#fff8e1]'
+                                    }`}
+                                >
+                                    全部
+                                </button>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setActiveCategory(cat)}
+                                        className={`whitespace-nowrap px-4 py-2 rounded-full border-2 font-bold transition-all ${
+                                            activeCategory === cat 
+                                            ? 'category-btn-active' 
+                                            : 'bg-[#fff] border-[#efebe0] text-[#8d6e63] hover:bg-[#fff8e1]'
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
                     {/* Main Content */}
-                    <div className="max-w-5xl mx-auto px-6 py-12 relative z-10">
+                    <div className="max-w-5xl mx-auto px-6 py-8 relative z-10">
                         {recipes.length === 0 ? (
                             <div className="text-center py-24 animate-float-warm">
                                 <div className="bg-[#fffdfa]/80 backdrop-blur-sm rounded-[3rem] p-12 inline-block hand-drawn-border">
@@ -358,35 +408,44 @@
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                                {recipes.map((recipe, index) => (
-                                    <div key={recipe.id} className={`bg-gradient-to-b ${getCardGradient(index)} rounded-[2.5rem] hand-drawn-border cursor-pointer group flex flex-col h-full overflow-hidden relative`} onClick={() => setSelectedRecipe(recipe)}>
-                                        <div className="h-52 relative overflow-hidden m-3 rounded-[2rem] border-2 border-[#efebe0]">
-                                            {recipe.image ? (
-                                                <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" />
-                                            ) : (
-                                                <div className="w-full h-full bg-[#fff8e1] flex items-center justify-center text-[#d7ccc8]">
-                                                    <span className="text-5xl opacity-50">🍥</span>
-                                                </div>
-                                            )}
-                                            <div className="absolute bottom-2 right-2 bg-[#fffcf7] px-2 py-1 rounded-full text-xs border border-[#efebe0] shadow-sm">
-                                                私房料理
-                                            </div>
-                                        </div>
-                                        <div className="px-6 pb-6 pt-3 flex-1 flex flex-col">
-                                            <h3 className="text-xl font-bold text-[#5d4037] mb-3 group-hover:text-[#d84315] transition-colors line-clamp-1 title-text">{recipe.name}</h3>
-                                            <div className="flex flex-wrap gap-2 mb-5">
-                                                <span className={`text-xs px-3 py-1.5 rounded-full border-2 font-bold ${getCategoryColor(recipe.category)}`}>{recipe.category}</span>
-                                                <span className="bg-[#efebe0] text-[#8d6e63] text-xs px-3 py-1.5 rounded-full border-2 border-[#e0d8c8] font-bold">難度: {recipe.difficulty}</span>
-                                            </div>
-                                            <div className="mt-auto pt-4 border-t-2 border-[#efebe0]/60 flex justify-between text-sm text-[#8d6e63] font-bold">
-                                                <span className="flex items-center gap-1 bg-[#fff8e1] px-2 py-1 rounded-lg">🥕 {recipe.ingredients ? recipe.ingredients.length : 0} 種食材</span>
-                                                {recipe.cookingTime && <span className="flex items-center gap-1 bg-[#e3f2fd] text-[#42a5f5] px-2 py-1 rounded-lg border border-[#bbdefb]">⏰ {recipe.cookingTime}</span>}
-                                            </div>
-                                        </div>
+                            <>
+                                {filteredRecipes.length === 0 ? (
+                                    <div className="text-center py-20">
+                                        <p className="text-xl text-[#8d6e63] font-bold">哎呀！「{activeCategory}」分類下還沒有食譜喔 🍜</p>
+                                        <button onClick={() => setActiveCategory('全部')} className="mt-4 text-[#ffab91] underline font-bold">查看全部</button>
                                     </div>
-                                ))}
-                            </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                                        {filteredRecipes.map((recipe, index) => (
+                                            <div key={recipe.id} className={`bg-gradient-to-b ${getCardGradient(index)} rounded-[2.5rem] hand-drawn-border cursor-pointer group flex flex-col h-full overflow-hidden relative`} onClick={() => setSelectedRecipe(recipe)}>
+                                                <div className="h-52 relative overflow-hidden m-3 rounded-[2rem] border-2 border-[#efebe0]">
+                                                    {recipe.image ? (
+                                                        <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-[#fff8e1] flex items-center justify-center text-[#d7ccc8]">
+                                                            <span className="text-5xl opacity-50">🍥</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute bottom-2 right-2 bg-[#fffcf7] px-2 py-1 rounded-full text-xs border border-[#efebe0] shadow-sm">
+                                                        私房料理
+                                                    </div>
+                                                </div>
+                                                <div className="px-6 pb-6 pt-3 flex-1 flex flex-col">
+                                                    <h3 className="text-xl font-bold text-[#5d4037] mb-3 group-hover:text-[#d84315] transition-colors line-clamp-1 title-text">{recipe.name}</h3>
+                                                    <div className="flex flex-wrap gap-2 mb-5">
+                                                        <span className={`text-xs px-3 py-1.5 rounded-full border-2 font-bold ${getCategoryColor(recipe.category)}`}>{recipe.category}</span>
+                                                        <span className="bg-[#efebe0] text-[#8d6e63] text-xs px-3 py-1.5 rounded-full border-2 border-[#e0d8c8] font-bold">難度: {recipe.difficulty}</span>
+                                                    </div>
+                                                    <div className="mt-auto pt-4 border-t-2 border-[#efebe0]/60 flex justify-between text-sm text-[#8d6e63] font-bold">
+                                                        <span className="flex items-center gap-1 bg-[#fff8e1] px-2 py-1 rounded-lg">🥕 {recipe.ingredients ? recipe.ingredients.length : 0} 種食材</span>
+                                                        {recipe.cookingTime && <span className="flex items-center gap-1 bg-[#e3f2fd] text-[#42a5f5] px-2 py-1 rounded-lg border border-[#bbdefb]">⏰ {recipe.cookingTime}</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -397,7 +456,7 @@
                                 <div className="sticky top-0 bg-[#fffcf7]/95 backdrop-blur-md z-10 px-8 py-6 border-b-2 border-[#efebe0] flex justify-between items-center">
                                     <div className="flex items-center gap-3">
                                         <span className="text-4xl animate-bounce">{editMode || showModal ? '📝' : '✨'}</span>
-                                        <h2 className="text-3xl font-bold text-[#5d4037] title-text">{showModal ? (editMode ? '修改食譜筆記' : '寫下新食譜！') : selectedRecipe.name}</h2>
+                                        <h2 className="text-3xl font-bold text-[#5d4037] title-text">{showModal ? (editMode ? '修改食譜' : '寫下新食譜') : selectedRecipe.name}</h2>
                                     </div>
                                     <button onClick={() => { setShowModal(false); setSelectedRecipe(null); }} className="bg-[#efebe0] hover:bg-[#ffccbc] p-2 rounded-full transition-colors border-2 border-[#e0d8c8] text-[#8d6e63]"><X className="w-7 h-7" /></button>
                                 </div>
