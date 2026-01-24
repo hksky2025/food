@@ -12,15 +12,16 @@
     
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.min.js"></script>
+
     <style>
         /* 引入圓潤、手寫感字體 */
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
         
         body {
             font-family: 'Zen Maru Gothic', 'Microsoft JhengHei', sans-serif;
-            /* 背景：溫暖奶油米色 */
             background-color: #fffcf7; 
-            color: #5c4a4a; /* 字體：柔和深棕色 */
+            color: #5c4a4a; 
         }
 
         /* 捲軸風格 */
@@ -75,7 +76,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- 1. 圖示組件 (暖棕色線條) ---
+        // --- 1. 圖示組件 ---
         const IconBase = ({ children, className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {children}
@@ -88,6 +89,7 @@
         const Edit2 = ({ className }) => <IconBase className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></IconBase>;
         const ChefHat = ({ className }) => <IconBase className={className}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"></path><line x1="6" y1="17" x2="20" y2="17"></line></IconBase>;
         const Camera = ({ className }) => <IconBase className={className}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
+        const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>;
 
         // --- 2. 儲存功能補丁 ---
         const setupStorage = () => {
@@ -135,6 +137,25 @@
                 difficulty: '中等',
                 image: null
             });
+
+            // 🌟 初始化 OpenCC 轉換器 (CN to T)
+            const convertToTraditional = async (text, field) => {
+                if (!text) return;
+                
+                try {
+                    // 檢查 OpenCC 是否載入成功
+                    if (window.OpenCC) {
+                        const converter = window.OpenCC.Converter({ from: 'cn', to: 't' });
+                        // OpenCC-JS 的這個版本返回結果
+                        const result = converter(text);
+                        setFormData(prev => ({ ...prev, [field]: result }));
+                    } else {
+                        alert("轉換功能正在載入中，請稍後再試！");
+                    }
+                } catch (e) {
+                    console.error("Conversion failed", e);
+                }
+            };
 
             useEffect(() => {
                 loadRecipes();
@@ -249,7 +270,6 @@
             ];
             const difficulties = ['簡單', '中等', '困難'];
 
-            // Chiikawa 配色
             const getCategoryColor = (category) => {
                 if (category && category.includes('減肥餐')) return 'bg-[#e8f5e9] text-[#558b2f] border-[#c8e6c9]';
                 if (category === '甜品') return 'bg-[#fffde7] text-[#fbc02d] border-[#fff59d]';
@@ -274,7 +294,7 @@
                     <div className="fixed top-1/2 left-20 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '2s'}}>✨</div>
                     <div className="fixed top-20 right-1/4 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍙</div>
 
-                    {/* Header Banner */}
+                    {/* Header */}
                     <div className="bg-[#fffcf7]/90 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-[0_2px_10px_-5px_#eaddca]">
                         <div className="w-full h-32 bg-gradient-to-r from-[#ffe0b2] via-[#ffccbc] to-[#d1c4e9] opacity-30 absolute top-0 left-0 z-0 mix-blend-multiply pointer-events-none"></div>
                         <div className="max-w-5xl mx-auto px-6 py-6 relative z-10 flex items-center justify-between">
@@ -370,7 +390,7 @@
                         )}
                     </div>
 
-                    {/* Modal Overlay */}
+                    {/* Modal */}
                     {(showModal || selectedRecipe) && (
                         <div className="fixed inset-0 bg-[#5d4037]/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
                             <div className="bg-[#fffcf7] rounded-[3rem] max-w-2xl w-full max-h-[88vh] overflow-y-auto hand-drawn-border animate-[float_0.3s_ease-out] relative">
@@ -419,12 +439,22 @@
 
                                             <div className="grid gap-5">
                                                 <div>
-                                                    <label className="block text-lg font-bold text-[#8d6e63] mb-2 ml-3">菜名 *</label>
+                                                    <div className="flex justify-between items-center mb-2 ml-3 mr-1">
+                                                        <label className="text-lg font-bold text-[#8d6e63]">菜名 *</label>
+                                                        {/* 🌟 簡轉繁按鈕 */}
+                                                        <button 
+                                                            onClick={() => convertToTraditional(formData.name, 'name')}
+                                                            className="text-xs bg-white border-2 border-[#ffcdd2] rounded-full px-3 py-1 hover:bg-[#ffebee] text-[#e57373] transition-colors flex items-center gap-1 font-bold shadow-sm active:scale-95"
+                                                        >
+                                                            <Sparkles className="w-3 h-3" />
+                                                            簡 ➜ 繁
+                                                        </button>
+                                                    </div>
                                                     <input 
                                                         value={formData.name}
                                                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                                                         className="w-full px-6 py-4 bg-[#fff8e1] border-2 border-[#ffe0b2] focus:border-[#ffab91] rounded-2xl outline-none transition-all font-bold text-[#5d4037] text-lg placeholder-[#d7ccc8]"
-                                                        placeholder="例如：博多豚骨拉麵"
+                                                        placeholder="例如：西红柿炒鸡蛋"
                                                     />
                                                 </div>
                                                 <div>
@@ -458,11 +488,20 @@
                                             </div>
 
                                             <div>
-                                                <label className="block text-lg font-bold text-[#8d6e63] mb-2 ml-3 flex items-center gap-2">
-                                                    食材清單 * <span className="text-sm bg-[#fff59d] px-2 py-0.5 rounded text-[#f57f17]">記得換行喔！</span>
-                                                </label>
+                                                <div className="flex justify-between items-center mb-2 ml-3 mr-1">
+                                                    <label className="text-lg font-bold text-[#8d6e63] flex items-center gap-2">
+                                                        食材清單 * <span className="text-sm bg-[#fff59d] px-2 py-0.5 rounded text-[#f57f17]">記得換行喔！</span>
+                                                    </label>
+                                                    {/* 🌟 簡轉繁按鈕 */}
+                                                    <button 
+                                                        onClick={() => convertToTraditional(formData.ingredients, 'ingredients')}
+                                                        className="text-xs bg-white border-2 border-[#ffcdd2] rounded-full px-3 py-1 hover:bg-[#ffebee] text-[#e57373] transition-colors flex items-center gap-1 font-bold shadow-sm active:scale-95"
+                                                    >
+                                                        <Sparkles className="w-3 h-3" />
+                                                        簡 ➜ 繁
+                                                    </button>
+                                                </div>
                                                 
-                                                {/* --- 修正後的 Textarea --- */}
                                                 <div className="relative">
                                                     <textarea 
                                                         value={formData.ingredients}
@@ -479,8 +518,6 @@
                                                     ></textarea>
                                                     <div className="absolute -top-3 right-10 bg-[#ffab91] w-4 h-12 rounded-full border-2 border-[#e64a19] shadow-md -rotate-6 pointer-events-none"></div>
                                                 </div>
-                                                {/* --- 修正結束 --- */}
-
                                             </div>
 
                                             <button onClick={saveRecipe} className="w-full bg-[#ffab91] text-[#5d4037] font-bold text-xl py-5 rounded-[2rem] hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 flex items-center justify-center gap-3">
