@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>吉伊の福岡美食手帳 (Chiikawa Style)</title>
+    <title>吉伊の私房料理手帳 (Chiikawa Style)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -15,7 +15,6 @@
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.min.js"></script>
 
     <style>
-        /* 引入圓潤、手寫感字體 */
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
         
         body {
@@ -138,15 +137,12 @@
                 image: null
             });
 
-            // 🌟 初始化 OpenCC 轉換器 (CN to T)
+            // 簡繁轉換
             const convertToTraditional = async (text, field) => {
                 if (!text) return;
-                
                 try {
-                    // 檢查 OpenCC 是否載入成功
                     if (window.OpenCC) {
                         const converter = window.OpenCC.Converter({ from: 'cn', to: 't' });
-                        // OpenCC-JS 的這個版本返回結果
                         const result = converter(text);
                         setFormData(prev => ({ ...prev, [field]: result }));
                     } else {
@@ -289,10 +285,10 @@
                 <div className="min-h-screen pb-20 font-medium text-[#5c4a4a]">
                     
                     {/* 背景漂浮裝飾 */}
-                    <div className="fixed top-10 left-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍜</div>
-                    <div className="fixed bottom-20 right-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '1s'}}>🚌</div>
+                    <div className="fixed top-10 left-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍳</div>
+                    <div className="fixed bottom-20 right-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '1s'}}>🥘</div>
                     <div className="fixed top-1/2 left-20 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '2s'}}>✨</div>
-                    <div className="fixed top-20 right-1/4 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍙</div>
+                    <div className="fixed top-20 right-1/4 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🥣</div>
 
                     {/* Header */}
                     <div className="bg-[#fffcf7]/90 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-[0_2px_10px_-5px_#eaddca]">
@@ -304,9 +300,10 @@
                                     <div className="absolute -top-2 -right-2 text-2xl animate-bounce">⭐</div>
                                 </div>
                                 <div>
-                                    <h1 className="text-3xl font-bold tracking-wider title-text text-[#5d4037]">吉伊の福岡美食手帳</h1>
+                                    {/* ✏️ 修改處：標題改為私房料理手帳 */}
+                                    <h1 className="text-3xl font-bold tracking-wider title-text text-[#5d4037]">吉伊の私房料理手帳</h1>
                                     <p className="text-[#8d6e63] text-sm font-bold mt-2 flex items-center gap-1">
-                                        <span>地道美食・大冒險！</span>
+                                        <span>記錄專屬的美味回憶</span>
                                         <span>😋</span>
                                     </p>
                                 </div>
@@ -326,9 +323,9 @@
                         {recipes.length === 0 ? (
                             <div className="text-center py-24 animate-float-warm">
                                 <div className="bg-[#fffdfa]/80 backdrop-blur-sm rounded-[3rem] p-12 inline-block hand-drawn-border">
-                                    <div className="text-8xl mb-6 opacity-80">🍜🥺</div>
-                                    <h3 className="text-2xl text-[#d84315] font-bold mb-3 title-text">肚子好餓喔...</h3>
-                                    <p className="text-[#8d6e63] text-lg">還沒有任何食譜呢，快點紀錄下來吧！</p>
+                                    <div className="text-8xl mb-6 opacity-80">🍳🥺</div>
+                                    <h3 className="text-2xl text-[#d84315] font-bold mb-3 title-text">還沒有食譜喔...</h3>
+                                    <p className="text-[#8d6e63] text-lg">快點紀錄下你的第一道私房菜吧！</p>
                                 </div>
                             </div>
                         ) : (
@@ -354,8 +351,9 @@
                                                     </div>
                                                 </div>
                                             )}
+                                            {/* ✏️ 修改處：改為私房料理 */}
                                             <div className="absolute bottom-2 right-2 bg-[#fffcf7] px-2 py-1 rounded-full text-xs border border-[#efebe0] shadow-sm">
-                                                福岡美味
+                                                私房料理
                                             </div>
                                         </div>
                                         
@@ -401,7 +399,7 @@
                                             {editMode || showModal ? '📝' : '✨'}
                                         </span>
                                         <h2 className="text-3xl font-bold text-[#5d4037] title-text">
-                                            {showModal ? (editMode ? '修改食譜筆記' : '寫下新發現！') : selectedRecipe.name}
+                                            {showModal ? (editMode ? '修改食譜筆記' : '寫下新食譜！') : selectedRecipe.name}
                                         </h2>
                                     </div>
                                     <button 
@@ -424,7 +422,7 @@
                                                         ) : (
                                                             <div className="text-center p-10">
                                                                 <Camera className="w-14 h-14 text-[#ffab91] mx-auto mb-4 animate-pulse" />
-                                                                <p className="text-[#d84315] font-bold text-lg">貼上美食照片！</p>
+                                                                <p className="text-[#d84315] font-bold text-lg">貼上料理照片！</p>
                                                                 <p className="text-[#8d6e63] text-sm mt-2">像拍立得一樣紀錄下來</p>
                                                             </div>
                                                         )}
@@ -441,7 +439,6 @@
                                                 <div>
                                                     <div className="flex justify-between items-center mb-2 ml-3 mr-1">
                                                         <label className="text-lg font-bold text-[#8d6e63]">菜名 *</label>
-                                                        {/* 🌟 簡轉繁按鈕 */}
                                                         <button 
                                                             onClick={() => convertToTraditional(formData.name, 'name')}
                                                             className="text-xs bg-white border-2 border-[#ffcdd2] rounded-full px-3 py-1 hover:bg-[#ffebee] text-[#e57373] transition-colors flex items-center gap-1 font-bold shadow-sm active:scale-95"
@@ -492,7 +489,6 @@
                                                     <label className="text-lg font-bold text-[#8d6e63] flex items-center gap-2">
                                                         食材清單 * <span className="text-sm bg-[#fff59d] px-2 py-0.5 rounded text-[#f57f17]">記得換行喔！</span>
                                                     </label>
-                                                    {/* 🌟 簡轉繁按鈕 */}
                                                     <button 
                                                         onClick={() => convertToTraditional(formData.ingredients, 'ingredients')}
                                                         className="text-xs bg-white border-2 border-[#ffcdd2] rounded-full px-3 py-1 hover:bg-[#ffebee] text-[#e57373] transition-colors flex items-center gap-1 font-bold shadow-sm active:scale-95"
