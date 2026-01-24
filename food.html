@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小廚料理手帳 (Filter Edition)</title>
+    <title>小廚料理手帳 (Auto-Wrap)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -21,14 +21,6 @@
             font-family: 'Zen Maru Gothic', 'Microsoft JhengHei', sans-serif;
             background-color: #fffcf7; 
             color: #5c4a4a; 
-        }
-        /* 隱藏橫向捲軸但保留功能 */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
         
         ::-webkit-scrollbar { width: 12px; }
@@ -74,12 +66,12 @@
         // 👇👇👇 請在這裡貼上你的 Firebase Config (從 Firebase Console 複製) 👇👇👇
         // ------------------------------------------------------------------
         const firebaseConfig = {
-            apiKey: "AIzaSyBB-oyBKoTYNHy60C9tMOkYA4HFuSsypr8",
-            authDomain: "food-97698.firebaseapp.com",
-            projectId: "food-97698",
-            storageBucket: "food-97698.firebasestorage.app",
-            messagingSenderId: "1026575280660",
-            appId: "1:1026575280660:web:e141380a8d0e3df5f55501"
+            apiKey: "你的_API_KEY",
+            authDomain: "你的_PROJECT_ID.firebaseapp.com",
+            projectId: "你的_PROJECT_ID",
+            storageBucket: "你的_PROJECT_ID.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
         };
         // ------------------------------------------------------------------
 
@@ -131,8 +123,7 @@
         const Edit2 = ({ className }) => <IconBase className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></IconBase>;
         const ChefHat = ({ className }) => <IconBase className={className}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"></path><line x1="6" y1="17" x2="20" y2="17"></line></IconBase>;
         const Camera = ({ className }) => <IconBase className={className}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
-        const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>;
-        const Search = ({ className }) => <IconBase className={className}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></IconBase>;
+        const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z"/></IconBase>;
 
         function RecipeManager() {
             const [recipes, setRecipes] = useState([]);
@@ -143,20 +134,19 @@
             const [isLoading, setIsLoading] = useState(false);
             const [processingImage, setProcessingImage] = useState(false);
             
-            // 🌟 新增：當前選擇的分類
             const [activeCategory, setActiveCategory] = useState('全部');
             
             const [formData, setFormData] = useState({
                 name: '',
                 fbLink: '',
                 ingredients: '',
-                category: '家常小菜', // 預設值
+                category: '家常小菜', 
                 cookingTime: '',
                 difficulty: '中等',
                 image: null
             });
 
-            // 🌟 優化後的分類清單
+            // 調整後的分類
             const categories = [
                 '家常小菜', '肉類料理', '海鮮料理', '蔬菜/素食', 
                 '湯水/糖水', '粉麵飯(主食)', '快速料理(15分)', 
@@ -165,7 +155,6 @@
             
             const difficulties = ['簡單', '中等', '困難'];
 
-            // OpenCC 轉換
             const convertToTraditional = async (text, field) => {
                 if (!text) return;
                 try {
@@ -331,7 +320,6 @@
                 return gradients[index % 3];
             };
 
-            // 🌟 篩選邏輯
             const filteredRecipes = activeCategory === '全部' 
                 ? recipes 
                 : recipes.filter(r => r.category === activeCategory);
@@ -346,7 +334,7 @@
                     <div className="bg-[#fffcf7]/95 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-sm">
                         <div className="max-w-5xl mx-auto px-6 pt-6 pb-2 relative z-10">
                             {/* Logo & Add Button */}
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex flex-wrap items-center justify-between mb-4 gap-3">
                                 <div className="flex items-center gap-4">
                                     <div className="bg-[#ffe0b2] p-3 rounded-full relative hand-drawn-border">
                                         <ChefHat className="w-9 h-9 text-[#d84315]" />
@@ -360,17 +348,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-[#ffab91] text-[#5d4037] px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95">
+                                <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-[#ffab91] text-[#5d4037] px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 shrink-0">
                                     <Plus className="w-6 h-6" />
                                     <span className="hidden md:inline text-lg">紀錄美食</span>
                                 </button>
                             </div>
 
-                            {/* 🌟 篩選 Bar (可橫向滑動) */}
-                            <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 pt-1 -mx-2 px-2">
+                            {/* 🌟 修正後的篩選 Bar：使用 flex-wrap 自動換行，不再隱藏 */}
+                            <div className="flex flex-wrap gap-2 pb-2 pt-1">
                                 <button
                                     onClick={() => setActiveCategory('全部')}
-                                    className={`whitespace-nowrap px-4 py-2 rounded-full border-2 font-bold transition-all ${
+                                    className={`px-4 py-2 rounded-full border-2 font-bold transition-all text-sm md:text-base ${
                                         activeCategory === '全部' 
                                         ? 'category-btn-active' 
                                         : 'bg-[#fff] border-[#efebe0] text-[#8d6e63] hover:bg-[#fff8e1]'
@@ -382,7 +370,7 @@
                                     <button
                                         key={cat}
                                         onClick={() => setActiveCategory(cat)}
-                                        className={`whitespace-nowrap px-4 py-2 rounded-full border-2 font-bold transition-all ${
+                                        className={`px-4 py-2 rounded-full border-2 font-bold transition-all text-sm md:text-base ${
                                             activeCategory === cat 
                                             ? 'category-btn-active' 
                                             : 'bg-[#fff] border-[#efebe0] text-[#8d6e63] hover:bg-[#fff8e1]'
