@@ -2,8 +2,10 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小廚料理手帳 (Category Synced)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>小廚料理手帳</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -14,6 +16,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.min.js"></script>
 
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='2' dy='4' stdDeviation='4' flood-color='%23e0d0b0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%23fffcf7'/%3E%3Ccircle cx='256' cy='256' r='220' fill='%23fff5e0' filter='url(%23shadow)'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23ffeec0' opacity='0.4'/%3E%3Cg transform='translate(106, 126) scale(1.2)'%3E%3Cpath d='M18 21h-3a4 4 0 0 1-3.7-2.4 5 5 0 0 1 .7-5.6 5 5 0 0 1 8.1 0 5 5 0 0 1 .8 5.6A4 4 0 0 1 18 21zm-10.6-2a4 4 0 0 1-.4-1.2 5 5 0 0 1 8 0 4 4 0 0 1-.4 1.2' fill='none' stroke='%23d84315' stroke-width='24' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 17 L20 17' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3C/g%3E%3Cpath d='M420 80 L435 125 L480 125 L445 155 L460 200 L420 170 L380 200 L395 155 L360 125 L405 125 Z' fill='%23fdd835' stroke='%23f9a825' stroke-width='8' stroke-linejoin='round' transform='rotate(15, 420, 140)' filter='url(%23shadow)'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3Cfilter id='shadow' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='2' dy='4' stdDeviation='4' flood-color='%23e0d0b0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%23fffcf7'/%3E%3Ccircle cx='256' cy='256' r='220' fill='%23fff5e0' filter='url(%23shadow)'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23ffeec0' opacity='0.4'/%3E%3Cg transform='translate(106, 126) scale(1.2)'%3E%3Cpath d='M18 21h-3a4 4 0 0 1-3.7-2.4 5 5 0 0 1 .7-5.6 5 5 0 0 1 8.1 0 5 5 0 0 1 .8 5.6A4 4 0 0 1 18 21zm-10.6-2a4 4 0 0 1-.4-1.2 5 5 0 0 1 8 0 4 4 0 0 1-.4 1.2' fill='none' stroke='%23d84315' stroke-width='24' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3Cpath d='M6 17 L20 17' fill='none' stroke='%23d84315' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' transform='scale(10)'/%3E%3C/g%3E%3Cpath d='M420 80 L435 125 L480 125 L445 155 L460 200 L420 170 L380 200 L395 155 L360 125 L405 125 Z' fill='%23fdd835' stroke='%23f9a825' stroke-width='8' stroke-linejoin='round' transform='rotate(15, 420, 140)' filter='url(%23shadow)'/%3E%3C/svg%3E">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
         
@@ -21,6 +26,8 @@
             font-family: 'Zen Maru Gothic', 'Microsoft JhengHei', sans-serif;
             background-color: #fffcf7; 
             color: #5c4a4a; 
+            /* 防止 iOS 橡皮筋效果 */
+            overscroll-behavior-y: none;
         }
         
         ::-webkit-scrollbar { width: 12px; }
@@ -282,7 +289,7 @@
                     name: '',
                     fbLink: '',
                     ingredients: '',
-                    category: categories[0], // 重置時也回到預設值
+                    category: categories[0],
                     cookingTime: '',
                     difficulty: '中等',
                     image: null
@@ -297,7 +304,7 @@
                     name: recipe.name,
                     fbLink: recipe.fbLink,
                     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients.join('\n') : recipe.ingredients,
-                    category: recipe.category || categories[0], // 確保舊資料也有分類
+                    category: recipe.category || categories[0],
                     cookingTime: recipe.cookingTime,
                     difficulty: recipe.difficulty,
                     image: recipe.image
