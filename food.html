@@ -13,17 +13,17 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* 引入更圓潤、手寫感的字體 */
+        /* 引入圓潤、手寫感字體 */
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
         
         body {
             font-family: 'Zen Maru Gothic', 'Microsoft JhengHei', sans-serif;
-            /* 背景改為溫暖的奶油米色，模擬紙張質感 */
+            /* 背景：溫暖奶油米色 */
             background-color: #fffcf7; 
-            color: #5c4a4a; /* 字體改為柔和的深棕色 */
+            color: #5c4a4a; /* 字體：柔和深棕色 */
         }
 
-        /* 捲軸風格：暖棕色與奶油色 */
+        /* 捲軸風格 */
         ::-webkit-scrollbar {
             width: 12px;
         }
@@ -32,7 +32,7 @@
             border-left: 2px solid #efebe0;
         }
         ::-webkit-scrollbar-thumb {
-            background: #e8d7c0; /* 奶茶色 */
+            background: #e8d7c0;
             border-radius: 10px;
             border: 3px solid #fffcf7;
         }
@@ -40,10 +40,10 @@
             background: #dcbca0; 
         }
 
-        /* 模擬插畫中的手繪邊框效果 */
+        /* 手繪邊框效果 */
         .hand-drawn-border {
-            border: 3px solid #eaddca; /* 柔和的米棕色邊框 */
-            box-shadow: 4px 4px 0px 0px #f4eee0; /* 實體感的暖色陰影 */
+            border: 3px solid #eaddca; 
+            box-shadow: 4px 4px 0px 0px #f4eee0; 
             transition: all 0.2s ease-in-out;
         }
         .hand-drawn-border:hover {
@@ -52,7 +52,7 @@
             border-color: #e0cdaf;
         }
         
-        /* 溫暖的漂浮動畫 */
+        /* 漂浮動畫 */
         @keyframes float-warm {
             0% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-8px) rotate(2deg); }
@@ -62,7 +62,7 @@
             animation: float-warm 4s ease-in-out infinite;
         }
 
-        /* 標題字體特效 */
+        /* 標題特效 */
         .title-text {
             text-shadow: 2px 2px 0px #fff, 4px 4px 0px #f2e6d8;
         }
@@ -75,13 +75,12 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- 圖示組件 (線條加粗並改為暖棕色) ---
+        // --- 1. 圖示組件 (暖棕色線條) ---
         const IconBase = ({ children, className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {children}
             </svg>
         );
-
         const Plus = ({ className }) => <IconBase className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></IconBase>;
         const X = ({ className }) => <IconBase className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>;
         const ExternalLink = ({ className }) => <IconBase className={className}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></IconBase>;
@@ -89,9 +88,8 @@
         const Edit2 = ({ className }) => <IconBase className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></IconBase>;
         const ChefHat = ({ className }) => <IconBase className={className}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"></path><line x1="6" y1="17" x2="20" y2="17"></line></IconBase>;
         const Camera = ({ className }) => <IconBase className={className}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
-        const Upload = ({ className }) => <IconBase className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></IconBase>;
 
-        // --- 儲存功能補丁 ---
+        // --- 2. 儲存功能補丁 ---
         const setupStorage = () => {
             if (!window.storage) {
                 window.storage = {
@@ -120,7 +118,7 @@
         };
         setupStorage();
 
-        // --- 主程式邏輯 ---
+        // --- 3. 主程式邏輯 ---
         function RecipeManager() {
             const [recipes, setRecipes] = useState([]);
             const [showModal, setShowModal] = useState(false);
@@ -251,22 +249,18 @@
             ];
             const difficulties = ['簡單', '中等', '困難'];
 
-            // Chiikawa 水彩風配色 (暖色調、低飽和)
+            // Chiikawa 配色
             const getCategoryColor = (category) => {
-                // 減肥餐：柔和的暖綠色
                 if (category && category.includes('減肥餐')) return 'bg-[#e8f5e9] text-[#558b2f] border-[#c8e6c9]';
-                // 甜品：柔和的奶油黃
                 if (category === '甜品') return 'bg-[#fffde7] text-[#fbc02d] border-[#fff59d]';
-                // 其他：柔和的珊瑚粉
                 return 'bg-[#ffebee] text-[#d32f2f] border-[#ffcdd2]';
             };
 
-            // 卡片背景：使用極淡的暖色漸變，模擬紙張染色
             const getCardGradient = (index) => {
                 const gradients = [
-                    'from-[#fff5f7] to-[#fffcf7]', // 淡粉 -> 米白 (Chiikawa)
-                    'from-[#f0f7ff] to-[#fffcf7]', // 淡藍 -> 米白 (Hachiware)
-                    'from-[#fffbea] to-[#fffcf7]'  // 淡黃 -> 米白 (Usagi)
+                    'from-[#fff5f7] to-[#fffcf7]', 
+                    'from-[#f0f7ff] to-[#fffcf7]', 
+                    'from-[#fffbea] to-[#fffcf7]' 
                 ];
                 return gradients[index % 3];
             };
@@ -274,27 +268,24 @@
             return (
                 <div className="min-h-screen pb-20 font-medium text-[#5c4a4a]">
                     
-                    {/* 背景裝飾 (使用插畫中的元素，顏色改為暖棕色) */}
+                    {/* 背景漂浮裝飾 */}
                     <div className="fixed top-10 left-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍜</div>
                     <div className="fixed bottom-20 right-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '1s'}}>🚌</div>
                     <div className="fixed top-1/2 left-20 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '2s'}}>✨</div>
                     <div className="fixed top-20 right-1/4 text-4xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍙</div>
 
-                    {/* Header Banner Area (模擬插畫頂部) */}
+                    {/* Header Banner */}
                     <div className="bg-[#fffcf7]/90 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-[0_2px_10px_-5px_#eaddca]">
-                         {/* 這裡可以放一張類似插畫的橫幅圖片，暫時用顏色和文字模擬 */}
                         <div className="w-full h-32 bg-gradient-to-r from-[#ffe0b2] via-[#ffccbc] to-[#d1c4e9] opacity-30 absolute top-0 left-0 z-0 mix-blend-multiply pointer-events-none"></div>
-                        
                         <div className="max-w-5xl mx-auto px-6 py-6 relative z-10 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                {/* Logo 改為手繪風格 */}
                                 <div className="bg-[#ffe0b2] p-3 rounded-full relative hand-drawn-border">
                                     <ChefHat className="w-9 h-9 text-[#d84315]" />
                                     <div className="absolute -top-2 -right-2 text-2xl animate-bounce">⭐</div>
                                 </div>
                                 <div>
                                     <h1 className="text-3xl font-bold tracking-wider title-text text-[#5d4037]">吉伊の福岡美食手帳</h1>
-                                    <p className="text-[#8d6e63] text-sm font-bold mt-2 flex items-centergap-1">
+                                    <p className="text-[#8d6e63] text-sm font-bold mt-2 flex items-center gap-1">
                                         <span>地道美食・大冒險！</span>
                                         <span>😋</span>
                                     </p>
@@ -325,11 +316,9 @@
                                 {recipes.map((recipe, index) => (
                                     <div
                                         key={recipe.id}
-                                        // 卡片樣式：手繪邊框、暖色實體陰影、極淡漸變背景
                                         className={`bg-gradient-to-b ${getCardGradient(index)} rounded-[2.5rem] hand-drawn-border cursor-pointer group flex flex-col h-full overflow-hidden relative`}
                                         onClick={() => setSelectedRecipe(recipe)}
                                     >
-                                        {/* Card Image */}
                                         <div className="h-52 relative overflow-hidden m-3 rounded-[2rem] border-2 border-[#efebe0]">
                                             {recipe.image ? (
                                                 <img 
@@ -345,13 +334,11 @@
                                                     </div>
                                                 </div>
                                             )}
-                                            {/* 圖片角落裝飾 */}
                                             <div className="absolute bottom-2 right-2 bg-[#fffcf7] px-2 py-1 rounded-full text-xs border border-[#efebe0] shadow-sm">
                                                 福岡美味
                                             </div>
                                         </div>
                                         
-                                        {/* Card Content */}
                                         <div className="px-6 pb-6 pt-3 flex-1 flex flex-col">
                                             <h3 className="text-xl font-bold text-[#5d4037] mb-3 group-hover:text-[#d84315] transition-colors line-clamp-1 title-text">
                                                 {recipe.name}
@@ -386,16 +373,14 @@
                     {/* Modal Overlay */}
                     {(showModal || selectedRecipe) && (
                         <div className="fixed inset-0 bg-[#5d4037]/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
-                            {/* Modal Content (手繪風格大彈窗) */}
                             <div className="bg-[#fffcf7] rounded-[3rem] max-w-2xl w-full max-h-[88vh] overflow-y-auto hand-drawn-border animate-[float_0.3s_ease-out] relative">
                                 
-                                {/* Modal Header */}
                                 <div className="sticky top-0 bg-[#fffcf7]/95 backdrop-blur-md z-10 px-8 py-6 border-b-2 border-[#efebe0] flex justify-between items-center">
                                     <div className="flex items-center gap-3">
                                         <span className="text-4xl animate-bounce">
                                             {editMode || showModal ? '📝' : '✨'}
                                         </span>
-                                        <h2 className="text-3xl font-bold text-[#5d4037 title-text">
+                                        <h2 className="text-3xl font-bold text-[#5d4037] title-text">
                                             {showModal ? (editMode ? '修改食譜筆記' : '寫下新發現！') : selectedRecipe.name}
                                         </h2>
                                     </div>
@@ -408,10 +393,8 @@
                                 </div>
 
                                 <div className="p-8">
-                                    {/* --- 編輯/新增模式 (Form) --- */}
                                     {showModal && (
                                         <div className="space-y-7">
-                                            {/* Image Upload */}
                                             <div className="flex justify-center">
                                                 <label className="relative cursor-pointer group w-full">
                                                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
@@ -434,7 +417,6 @@
                                                 </label>
                                             </div>
 
-                                            {/* Inputs (手繪風格輸入框) */}
                                             <div className="grid gap-5">
                                                 <div>
                                                     <label className="block text-lg font-bold text-[#8d6e63] mb-2 ml-3">菜名 *</label>
@@ -456,21 +438,18 @@
                                                 </div>
                                             </div>
 
-                                            {/* Selects & Time */}
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                                 <div className="relative">
                                                     <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">類別</label>
                                                     <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-5 py-3 bg-[#fff8e1] rounded-xl outline-none border-2 border-[#ffe0b2] cursor-pointer font-bold text-[#5d4037] appearance-none">
                                                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                                     </select>
-                                                    <span className="absolute right-4 top-[42px] pointer-events-none text-[#8d6e63]">▼</span>
                                                 </div>
                                                 <div className="relative">
                                                     <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">難度</label>
                                                     <select value={formData.difficulty} onChange={(e) => setFormData({...formData, difficulty: e.target.value})} className="w-full px-5 py-3 bg-[#efebe0] rounded-xl outline-none border-2 border-[#e0d8c8] cursor-pointer font-bold text-[#5d4037] appearance-none">
                                                         {difficulties.map(d => <option key={d} value={d}>{d}</option>)}
                                                     </select>
-                                                    <span className="absolute right-4 top-[42px] pointer-events-none text-[#8d6e63]">▼</span>
                                                 </div>
                                                  <div>
                                                     <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">時間</label>
@@ -478,18 +457,30 @@
                                                 </div>
                                             </div>
 
-                                            {/* Ingredients (手繪便條紙風格 textarea) */}
                                             <div>
                                                 <label className="block text-lg font-bold text-[#8d6e63] mb-2 ml-3 flex items-center gap-2">
                                                     食材清單 * <span className="text-sm bg-[#fff59d] px-2 py-0.5 rounded text-[#f57f17]">記得換行喔！</span>
                                                 </label>
-                                                <textarea 
-                                                    value={formData.ingredients}
-                                                    onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
-                                                    className="w-full px-6 py-4 bg-[#fffdeb] border-2 border-[#fff59d] focus:border-[#fdd835] rounded-2xl outline-none transition-all min-h-[180px] font-medium text-[#5d4037] placeholder-[#d7ccc8] shadow-inner"
-                                                    placeholder="拉麵 1份&#10;叉燒 2片&#10;蔥花 適量..."
-                                                    style={{backgroundImage: 'linear-gradient(transparent, transparent 28px, #fff9c4 28px)', backgroundSize: '30px 30px', lineHeight: '30px'}}
-                                                ></textarea>
+                                                
+                                                {/* --- 修正後的 Textarea --- */}
+                                                <div className="relative">
+                                                    <textarea 
+                                                        value={formData.ingredients}
+                                                        onChange={(e) => setFormData({...formData, ingredients: e.target.value})}
+                                                        className="w-full px-6 py-2 bg-[#fffdeb] border-2 border-[#fff59d] focus:border-[#fdd835] rounded-2xl outline-none transition-all min-h-[180px] font-medium text-[#5d4037] placeholder-[#d7ccc8] shadow-inner text-lg"
+                                                        placeholder="拉麵 1份&#10;叉燒 2片&#10;蔥花 適量..."
+                                                        style={{
+                                                            lineHeight: '32px',
+                                                            backgroundImage: 'linear-gradient(transparent 31px, #fff176 31px)',
+                                                            backgroundSize: '100% 32px',
+                                                            backgroundAttachment: 'local',
+                                                            paddingTop: '6px'
+                                                        }}
+                                                    ></textarea>
+                                                    <div className="absolute -top-3 right-10 bg-[#ffab91] w-4 h-12 rounded-full border-2 border-[#e64a19] shadow-md -rotate-6 pointer-events-none"></div>
+                                                </div>
+                                                {/* --- 修正結束 --- */}
+
                                             </div>
 
                                             <button onClick={saveRecipe} className="w-full bg-[#ffab91] text-[#5d4037] font-bold text-xl py-5 rounded-[2rem] hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 flex items-center justify-center gap-3">
@@ -499,21 +490,17 @@
                                         </div>
                                     )}
 
-                                    {/* --- 檢視模式 (Detail View) --- */}
                                     {selectedRecipe && !showModal && (
                                         <div className="space-y-8 relative">
-                                            {/* 裝飾膠帶 */}
                                             <div className="absolute -top-6 -left-6 w-20 h-8 bg-[#ffccbc] opacity-50 rotate-[-15deg] pointer-events-none"></div>
                                             <div className="absolute -top-6 -right-6 w-20 h-8 bg-[#b2dfdb] opacity-50 rotate-[15deg] pointer-events-none"></div>
 
-                                            {/* Image Display */}
                                             {selectedRecipe.image && (
                                                 <div className="rounded-[2.5rem] overflow-hidden hand-drawn-border border-4 border-[#efebe0]">
                                                     <img src={selectedRecipe.image} className="w-full h-72 object-cover opacity-95" />
                                                 </div>
                                             )}
 
-                                            {/* Meta Tags */}
                                             <div className="flex flex-wrap gap-4 justify-center">
                                                 <span className={`px-5 py-2.5 rounded-full font-bold text-lg border-2 hand-drawn-border ${getCategoryColor(selectedRecipe.category)}`}>
                                                     🏷️ {selectedRecipe.category}
@@ -528,7 +515,6 @@
                                                 )}
                                             </div>
 
-                                            {/* Ingredients List (筆記本內頁風格) */}
                                             <div className="bg-[#fffdeb] rounded-[2.5rem] p-8 relative border-2 border-[#fff59d] shadow-[inset_0_0_20px_rgba(255,249,196,0.5)]">
                                                 <div className="absolute -top-5 left-8 bg-[#fdd835] px-4 py-1.5 rounded-full text-lg font-bold text-[#5d4037] border-2 border-[#fbc02d] shadow-sm rotate-[-2deg]">
                                                     準備材料清單 📝
@@ -543,7 +529,6 @@
                                                 </ul>
                                             </div>
 
-                                            {/* Actions */}
                                             <div className="flex flex-col sm:flex-row gap-5 pt-4">
                                                 <a href={selectedRecipe.fbLink} target="_blank" className="flex-1 bg-[#64b5f6] text-white text-center py-4 rounded-[2rem] font-bold text-xl hover:bg-[#42a5f5] transition-all hand-drawn-border flex items-center justify-center gap-3 group">
                                                     <ExternalLink className="w-7 h-7 group-hover:rotate-12 transition-transform" />
