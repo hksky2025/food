@@ -6,623 +6,1172 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="小廚手帳">
-    
     <title>小廚料理手帳</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.min.js"></script>
-
     <link rel="icon" href="icon.png" type="image/png">
     <link rel="apple-touch-icon" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
-        
-        body {
-            font-family: 'Zen Maru Gothic', 'Microsoft JhengHei', sans-serif;
-            background-color: #fffcf7; 
-            color: #5c4a4a; 
-            overscroll-behavior-y: none;
-        }
-        
-        ::-webkit-scrollbar { width: 12px; }
-        ::-webkit-scrollbar-track { background: #fffcf7; border-left: 2px solid #efebe0; }
-        ::-webkit-scrollbar-thumb { background: #e8d7c0; border-radius: 10px; border: 3px solid #fffcf7; }
-        ::-webkit-scrollbar-thumb:hover { background: #dcbca0; }
-        
-        .hand-drawn-border {
-            border: 3px solid #eaddca; 
-            box-shadow: 4px 4px 0px 0px #f4eee0; 
-            transition: all 0.2s ease-in-out;
-        }
-        .hand-drawn-border:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px 0px #f4eee0;
-            border-color: #e0cdaf;
-        }
-        
-        .category-btn-active {
-            background-color: #ffab91;
-            color: #5d4037;
-            border-color: #ff8a65;
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+        :root {
+            --cream:    #fdf6ed;
+            --parchment:#f5ead8;
+            --warm-tan: #e8d5b0;
+            --caramel:  #c9995a;
+            --spice:    #b5541c;
+            --ember:    #8b3a0f;
+            --ink:      #3b2409;
+            --sage:     #7a9e7e;
+            --sky:      #7aaec9;
+            --gold:     #d4a017;
         }
 
-        @keyframes float-warm {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(2deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--cream);
+            color: var(--ink);
+            overscroll-behavior-y: none;
+            min-height: 100vh;
         }
-        .animate-float-warm { animation: float-warm 4s ease-in-out infinite; }
-        .title-text { text-shadow: 2px 2px 0px #fff, 4px 4px 0px #f2e6d8; }
+
+        /* === PAPER TEXTURE BACKGROUND === */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--parchment); }
+        ::-webkit-scrollbar-thumb { background: var(--warm-tan); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--caramel); }
+
+        /* === TYPOGRAPHY === */
+        .font-serif { font-family: 'Noto Serif TC', serif; }
+
+        /* === HEADER HERO === */
+        .header-hero {
+            background: linear-gradient(160deg, #2d1a0a 0%, #5c2d0f 40%, #8b4b1a 70%, #c97d3a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .header-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(212,160,23,0.18) 0%, transparent 70%);
+        }
+        .header-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0; right: 0;
+            height: 40px;
+            background: var(--cream);
+            clip-path: ellipse(55% 100% at 50% 100%);
+        }
+
+        /* === DECORATIVE BORDER === */
+        .deco-border {
+            border: 2px solid var(--warm-tan);
+            box-shadow: 0 4px 24px rgba(59,36,9,0.08), 0 1px 3px rgba(59,36,9,0.06);
+            transition: all 0.25s ease;
+        }
+        .deco-border:hover {
+            border-color: var(--caramel);
+            box-shadow: 0 8px 32px rgba(59,36,9,0.13), 0 2px 6px rgba(59,36,9,0.08);
+            transform: translateY(-2px);
+        }
+
+        /* === RECIPE CARD === */
+        .recipe-card {
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1.5px solid var(--warm-tan);
+            box-shadow: 0 2px 16px rgba(59,36,9,0.07);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer;
+        }
+        .recipe-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 12px 40px rgba(59,36,9,0.14);
+            border-color: var(--caramel);
+        }
+        .recipe-card .card-img-wrap {
+            height: 185px;
+            overflow: hidden;
+            position: relative;
+            background: var(--parchment);
+        }
+        .recipe-card .card-img-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s ease;
+        }
+        .recipe-card:hover .card-img-wrap img {
+            transform: scale(1.08);
+        }
+        .recipe-card .card-img-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(43,20,5,0.55) 0%, transparent 55%);
+        }
+        .recipe-card .card-body { padding: 16px 18px 18px; }
+        .recipe-card .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* === CATEGORY PILL === */
+        .cat-pill {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 99px;
+            border: 1.5px solid var(--warm-tan);
+            background: var(--parchment);
+            color: var(--ember);
+            white-space: nowrap;
+        }
+        .cat-btn {
+            padding: 6px 14px;
+            border-radius: 99px;
+            border: 1.5px solid var(--warm-tan);
+            background: #fff;
+            color: #7a5c3a;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .cat-btn:hover { background: var(--parchment); border-color: var(--caramel); }
+        .cat-btn.active {
+            background: var(--spice);
+            color: #fff;
+            border-color: var(--ember);
+            box-shadow: 0 2px 10px rgba(181,84,28,0.3);
+        }
+
+        /* === MODAL === */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(29,13,2,0.55);
+            backdrop-filter: blur(6px);
+            z-index: 50;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-box {
+            background: var(--cream);
+            border-radius: 24px;
+            max-width: 680px; width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 32px 80px rgba(29,13,2,0.4);
+            border: 1.5px solid var(--warm-tan);
+            animation: slideUp 0.25s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+        }
+        .modal-header {
+            position: sticky; top: 0;
+            background: rgba(253,246,237,0.97);
+            backdrop-filter: blur(10px);
+            padding: 20px 28px 16px;
+            border-bottom: 1.5px solid var(--warm-tan);
+            z-index: 10;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-body { padding: 28px; }
+
+        /* === FORM INPUTS === */
+        .form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ember);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 7px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 11px 16px;
+            background: #fff;
+            border: 1.5px solid var(--warm-tan);
+            border-radius: 12px;
+            outline: none;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.95rem;
+            color: var(--ink);
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+        .form-input:focus {
+            border-color: var(--caramel);
+            box-shadow: 0 0 0 3px rgba(201,153,90,0.15);
+        }
+        .form-input::placeholder { color: #c4a87a; }
+        textarea.form-input { resize: none; }
+
+        /* === BUTTONS === */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--spice) 0%, var(--ember) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 28px;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 18px rgba(139,58,15,0.3);
+            letter-spacing: 0.04em;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(139,58,15,0.4);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        .btn-ghost {
+            background: var(--parchment);
+            color: var(--ember);
+            border: 1.5px solid var(--warm-tan);
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .btn-ghost:hover { background: var(--warm-tan); }
+
+        .btn-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid var(--warm-tan);
+            background: #fff;
+            color: var(--ember);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .btn-icon:hover { background: var(--parchment); border-color: var(--caramel); }
+
+        /* === SECTION HEADING === */
+        .section-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--parchment);
+            border: 1.5px solid var(--warm-tan);
+            border-radius: 8px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ember);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        /* === INGREDIENT LIST === */
+        .ingredient-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px;
+            background: #fff;
+            border: 1.5px solid var(--warm-tan);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--ink);
+        }
+        .ingredient-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--caramel);
+            flex-shrink: 0;
+        }
+
+        /* === STEP ITEM === */
+        .step-item {
+            display: flex; gap: 14px;
+            padding-bottom: 20px;
+            position: relative;
+        }
+        .step-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 17px; top: 36px;
+            width: 2px;
+            bottom: 0;
+            background: linear-gradient(to bottom, var(--warm-tan), transparent);
+        }
+        .step-num {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--spice);
+            color: #fff;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(181,84,28,0.25);
+        }
+        .step-content { flex: 1; padding-top: 6px; }
+
+        /* === FLOATING DECO === */
+        .float-deco {
+            position: fixed;
+            pointer-events: none; user-select: none;
+            opacity: 0.055;
+            font-size: 5rem;
+            animation: floatAnim 6s ease-in-out infinite;
+            z-index: 0;
+        }
+        @keyframes floatAnim {
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            50%      { transform: translateY(-14px) rotate(4deg); }
+        }
+
+        /* === EMPTY STATE === */
+        .empty-plate {
+            text-align: center; padding: 80px 20px;
+        }
+        .empty-plate .plate-icon {
+            font-size: 4.5rem;
+            display: block;
+            margin-bottom: 20px;
+            animation: floatAnim 4s ease-in-out infinite;
+        }
+
+        /* === DIFFICULTY BADGE === */
+        .badge-easy   { background: #e8f5e9; color: #388e3c; border-color: #a5d6a7; }
+        .badge-medium { background: #fff8e1; color: #f57f17; border-color: #ffe082; }
+        .badge-hard   { background: #fbe9e7; color: #bf360c; border-color: #ffab91; }
+
+        /* === IMAGE UPLOAD === */
+        .img-upload-zone {
+            width: 100%; height: 200px;
+            border-radius: 16px;
+            border: 2px dashed var(--warm-tan);
+            background: var(--parchment);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; overflow: hidden;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .img-upload-zone:hover { border-color: var(--caramel); background: #f5e8d0; }
+        .img-upload-zone img { width: 100%; height: 100%; object-fit: cover; }
+        .img-upload-overlay {
+            position: absolute; inset: 0;
+            background: rgba(43,20,5,0.5);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s;
+            border-radius: 14px;
+        }
+        .img-upload-zone:hover .img-upload-overlay { opacity: 1; }
+
+        /* === NOTEBOOK LINES === */
+        .notebook-textarea {
+            line-height: 32px;
+            background-image: linear-gradient(transparent 31px, rgba(201,153,90,0.2) 31px);
+            background-size: 100% 32px;
+            background-attachment: local;
+            padding-top: 4px;
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { transform:translateY(30px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        @keyframes spin    { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        /* === LOADING SPINNER === */
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+        }
+
+        /* === SEARCH BAR === */
+        .search-bar {
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            background: #fff;
+            border: 1.5px solid var(--warm-tan);
+            border-radius: 99px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.88rem;
+            color: var(--ink);
+            outline: none;
+            transition: all 0.18s;
+        }
+        .search-bar input:focus {
+            border-color: var(--caramel);
+            box-shadow: 0 0 0 3px rgba(201,153,90,0.15);
+        }
+        .search-bar .search-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--caramel);
+            pointer-events: none;
+        }
+
+        /* === PROGRESS BAR === */
+        .top-loader {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--spice), var(--gold), var(--caramel));
+            z-index: 9999;
+            animation: loadBar 1.5s ease-in-out infinite;
+            transform-origin: left;
+        }
+        @keyframes loadBar {
+            0%   { transform: scaleX(0); opacity:1; }
+            70%  { transform: scaleX(0.85); opacity:1; }
+            100% { transform: scaleX(1); opacity:0; }
+        }
+
+        /* === GRID === */
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        /* === DETAIL VIEW === */
+        .detail-hero {
+            width: 100%;
+            height: 260px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background: var(--parchment);
+        }
+        .detail-hero img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .detail-hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(29,13,2,0.65) 0%, transparent 60%);
+        }
+        .detail-hero-title {
+            position: absolute; bottom: 16px; left: 18px; right: 18px;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem; font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* Step form card */
+        .step-form-card {
+            background: #fff;
+            border: 1.5px solid var(--warm-tan);
+            border-radius: 14px;
+            padding: 16px;
+            position: relative;
+        }
+
+        /* SIMPLE CONVERT BTN */
+        .convert-btn {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 99px;
+            border: 1.5px solid #f8bbd0;
+            background: #fff;
+            color: #c2185b;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .convert-btn:hover { background: #fce4ec; }
     </style>
 </head>
-<body class="min-h-screen relative overflow-x-hidden bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]">
+<body>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, setDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ------------------------------------------------------------------
-        // 👇👇👇 請在這裡貼上你的 Firebase Config (從 Firebase Console 複製) 👇👇👇
-        // ------------------------------------------------------------------
-        const firebaseConfig = {
-            apiKey: "AIzaSyBB-oyBKoTYNHy60C9tMOkYA4HFuSsypr8",
-            authDomain: "food-97698.firebaseapp.com",
-            projectId: "food-97698",
-            storageBucket: "food-97698.firebasestorage.app",
-            messagingSenderId: "1026575280660",
-            appId: "1:1026575280660:web:e141380a8d0e3df5f55501"
-        };
-        // ------------------------------------------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyBB-oyBKoTYNHy60C9tMOkYA4HFuSsypr8",
+        authDomain: "food-97698.firebaseapp.com",
+        projectId: "food-97698",
+        storageBucket: "food-97698.firebasestorage.app",
+        messagingSenderId: "1026575280660",
+        appId: "1:1026575280660:web:e141380a8d0e3df5f55501"
+    };
 
-        // 初始化 Firebase
-        let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            console.log("🔥 Firebase 連接成功！");
-        } catch (e) {
-            console.error("Firebase 初始化失敗 (請檢查 Config)", e);
+    let db;
+    try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        console.log("🔥 Firebase 連接成功！");
+    } catch (e) {
+        console.error("Firebase 初始化失敗", e);
+    }
+
+    window.db_api = {
+        list: async () => {
+            if (!db) return [];
+            const querySnapshot = await getDocs(collection(db, "recipes"));
+            const recipes = [];
+            querySnapshot.forEach((d) => { recipes.push(d.data()); });
+            return recipes;
+        },
+        save: async (recipe) => {
+            if (!db) throw new Error("Database not connected");
+            await setDoc(doc(db, "recipes", recipe.id), recipe);
+        },
+        delete: async (id) => {
+            if (!db) throw new Error("Database not connected");
+            await deleteDoc(doc(db, "recipes", id));
         }
+    };
+    window.dispatchEvent(new Event('firebase-ready'));
+</script>
 
-        window.db_api = {
-            list: async () => {
-                if (!db) return [];
-                const querySnapshot = await getDocs(collection(db, "recipes"));
-                const recipes = [];
-                querySnapshot.forEach((doc) => {
-                    recipes.push(doc.data());
-                });
-                return recipes;
-            },
-            save: async (recipe) => {
-                if (!db) throw new Error("Database not connected");
-                await setDoc(doc(db, "recipes", recipe.id), recipe);
-            },
-            delete: async (id) => {
-                if (!db) throw new Error("Database not connected");
-                await deleteDoc(doc(db, "recipes", id));
-            }
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+const Ico = ({ d, children, size = 20, stroke = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+        {d ? <path d={d}/> : children}
+    </svg>
+);
+const IcoPlus      = (p) => <Ico {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></Ico>;
+const IcoX         = (p) => <Ico {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Ico>;
+const IcoLink      = (p) => <Ico {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></Ico>;
+const IcoTrash     = (p) => <Ico {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></Ico>;
+const IcoEdit      = (p) => <Ico {...p} d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>;
+const IcoChef      = (p) => <Ico {...p}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"/><line x1="6" y1="17" x2="20" y2="17"/></Ico>;
+const IcoCamera    = (p) => <Ico {...p}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></Ico>;
+const IcoImage     = (p) => <Ico {...p}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></Ico>;
+const IcoSparkle   = (p) => <Ico {...p} d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z"/>;
+const IcoSearch    = (p) => <Ico {...p}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></Ico>;
+const IcoClock     = (p) => <Ico {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Ico>;
+const IcoFire      = (p) => <Ico {...p} d="M12 2c0 0-4 4-4 8.5C8 13.5 9.5 16 12 16s4-2.5 4-5.5C16 6 12 2 12 2z"/>;
+const IcoBook      = (p) => <Ico {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></Ico>;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const CATEGORIES = [
+    '家常小菜','肉類料理','海鮮料理','蔬菜/素食',
+    '湯水/糖水','粉麵飯(主食)','快速料理(15分)',
+    '減脂/健康','早餐/烘焙','日韓料理','西式料理','其他'
+];
+const DIFFICULTIES = ['簡單','中等','困難'];
+
+const diffBadge = (d) => {
+    if (d === '簡單') return 'badge-easy';
+    if (d === '困難') return 'badge-hard';
+    return 'badge-medium';
+};
+
+const catEmoji = (c) => {
+    if (!c) return '🍽';
+    if (c.includes('肉'))  return '🥩';
+    if (c.includes('海鮮')) return '🦐';
+    if (c.includes('蔬菜') || c.includes('素')) return '🥦';
+    if (c.includes('湯'))  return '🍲';
+    if (c.includes('粉麵') || c.includes('主食')) return '🍜';
+    if (c.includes('快速')) return '⚡';
+    if (c.includes('減脂') || c.includes('健康')) return '🥗';
+    if (c.includes('早餐') || c.includes('烘焙')) return '🥐';
+    if (c.includes('日') || c.includes('韓')) return '🍱';
+    if (c.includes('西')) return '🍝';
+    return '🍳';
+};
+
+// ─── Image Compression ────────────────────────────────────────────────────────
+const compressImage = (file) => new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX = 800;
+            let w = img.width, h = img.height;
+            if (w > MAX) { h *= MAX / w; w = MAX; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            res(canvas.toDataURL('image/jpeg', 0.65));
         };
-        window.dispatchEvent(new Event('firebase-ready'));
-    </script>
+        img.onerror = rej;
+    };
+    reader.onerror = rej;
+});
 
-    <div id="root"></div>
+// ─── Traditional Chinese Converter ────────────────────────────────────────────
+const toTrad = (text, cb) => {
+    if (!text) return;
+    try {
+        if (window.OpenCC) {
+            const cvt = window.OpenCC.Converter({ from: 'cn', to: 't' });
+            cb(cvt(text));
+        }
+    } catch(e) {}
+};
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+// ─── Empty Form ───────────────────────────────────────────────────────────────
+const emptyForm = () => ({
+    name: '', fbLink: '', ingredients: '',
+    category: CATEGORIES[0], cookingTime: '',
+    difficulty: '中等', image: null, steps: []
+});
 
-        // --- 圖示組件 ---
-        const IconBase = ({ children, className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
-        );
-        const Plus = ({ className }) => <IconBase className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></IconBase>;
-        const X = ({ className }) => <IconBase className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>;
-        const ExternalLink = ({ className }) => <IconBase className={className}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></IconBase>;
-        const Trash2 = ({ className }) => <IconBase className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></IconBase>;
-        const Edit2 = ({ className }) => <IconBase className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></IconBase>;
-        const ChefHat = ({ className }) => <IconBase className={className}><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"></path><line x1="6" y1="17" x2="20" y2="17"></line></IconBase>;
-        const Camera = ({ className }) => <IconBase className={className}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
-        const Sparkles = ({ className }) => <IconBase className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z"/></IconBase>;
-        const ImageIcon = ({ className }) => <IconBase className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></IconBase>;
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════════════════
+function RecipeManager() {
+    const [recipes, setRecipes]           = useState([]);
+    const [isLoading, setIsLoading]       = useState(false);
+    const [activeCategory, setActiveCategory] = useState('全部');
+    const [searchQuery, setSearchQuery]   = useState('');
+    const [showModal, setShowModal]       = useState(false);
+    const [selectedRecipe, setSelectedRecipe] = useState(null);
+    const [editMode, setEditMode]         = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [processingImage, setProcessingImage] = useState(false);
+    const [formData, setFormData]         = useState(emptyForm());
 
-        function RecipeManager() {
-            const [recipes, setRecipes] = useState([]);
-            const [showModal, setShowModal] = useState(false);
-            const [selectedRecipe, setSelectedRecipe] = useState(null);
-            const [editMode, setEditMode] = useState(false);
-            const [imagePreview, setImagePreview] = useState(null);
-            const [isLoading, setIsLoading] = useState(false);
-            const [processingImage, setProcessingImage] = useState(false);
-            const [activeCategory, setActiveCategory] = useState('全部');
-            
-            // 核心分類
-            const categories = [
-                '家常小菜', '肉類料理', '海鮮料理', '蔬菜/素食', 
-                '湯水/糖水', '粉麵飯(主食)', '快速料理(15分)', 
-                '減脂/健康', '早餐/烘焙', '日韓料理', '西式料理', '其他'
-            ];
-            
-            const [formData, setFormData] = useState({
-                name: '',
-                fbLink: '',
-                ingredients: '',
-                category: categories[0],
-                cookingTime: '',
-                difficulty: '中等',
-                image: null,
-                steps: [] // 🌟 新增：步驟陣列
-            });
+    // ── Load ─────────────────────────────────────────────────────────────────
+    const loadRecipes = async () => {
+        setIsLoading(true);
+        try {
+            if (window.db_api) {
+                const data = await window.db_api.list();
+                setRecipes(data.sort((a, b) => b.timestamp - a.timestamp));
+            }
+        } catch (e) { console.error(e); }
+        setIsLoading(false);
+    };
 
-            const difficulties = ['簡單', '中等', '困難'];
+    useEffect(() => {
+        loadRecipes();
+        window.addEventListener('firebase-ready', loadRecipes);
+        return () => window.removeEventListener('firebase-ready', loadRecipes);
+    }, []);
 
-            const convertToTraditional = async (text, field) => {
-                if (!text) return;
-                try {
-                    if (window.OpenCC) {
-                        const converter = window.OpenCC.Converter({ from: 'cn', to: 't' });
-                        const result = converter(text);
-                        setFormData(prev => ({ ...prev, [field]: result }));
-                    } else {
-                        alert("轉換功能正在載入中，請稍後再試！");
-                    }
-                } catch (e) {
-                    console.error("Conversion failed", e);
-                }
-            };
+    // ── Image Handlers ────────────────────────────────────────────────────────
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        setProcessingImage(true);
+        try {
+            const compressed = await compressImage(file);
+            setImagePreview(compressed);
+            setFormData(p => ({ ...p, image: compressed }));
+        } catch(e) { alert('圖片處理失敗'); }
+        setProcessingImage(false);
+    };
 
-            const loadRecipes = async () => {
-                setIsLoading(true);
-                try {
-                    if (window.db_api) {
-                        const data = await window.db_api.list();
-                        setRecipes(data.sort((a, b) => b.timestamp - a.timestamp));
-                    }
-                } catch (error) {
-                    console.error('Loading Error:', error);
-                }
-                setIsLoading(false);
-            };
+    // ── Step Handlers ─────────────────────────────────────────────────────────
+    const addStep    = () => setFormData(p => ({ ...p, steps: [...(p.steps||[]), { text:'', image:null }] }));
+    const removeStep = (i) => setFormData(p => ({ ...p, steps: p.steps.filter((_,idx)=>idx!==i) }));
+    const updateStepText = (i, text) => setFormData(p => {
+        const s = [...p.steps]; s[i] = { ...s[i], text }; return { ...p, steps: s };
+    });
+    const updateStepImage = async (i, e) => {
+        const file = e.target.files[0]; if (!file) return;
+        try {
+            const compressed = await compressImage(file);
+            setFormData(p => { const s = [...p.steps]; s[i] = { ...s[i], image: compressed }; return { ...p, steps: s }; });
+        } catch(e) { alert('步驟圖片處理失敗'); }
+    };
+    const removeStepImage = (i) => setFormData(p => {
+        const s = [...p.steps]; s[i] = { ...s[i], image: null }; return { ...p, steps: s };
+    });
 
-            useEffect(() => {
-                loadRecipes();
-                window.addEventListener('firebase-ready', loadRecipes);
-                return () => window.removeEventListener('firebase-ready', loadRecipes);
-            }, []);
+    // ── Save / Delete ─────────────────────────────────────────────────────────
+    const saveRecipe = async () => {
+        if (!formData.name || !formData.fbLink || !formData.ingredients) {
+            alert('請填寫菜名、連結和食材！'); return;
+        }
+        setIsLoading(true);
+        const ings = Array.isArray(formData.ingredients)
+            ? formData.ingredients
+            : formData.ingredients.split('\n').filter(i => i.trim());
+        const recipe = {
+            id: editMode ? selectedRecipe.id : Date.now().toString(),
+            ...formData, ingredients: ings, steps: formData.steps || [],
+            timestamp: editMode ? selectedRecipe.timestamp : Date.now()
+        };
+        try {
+            await window.db_api.save(recipe);
+            await loadRecipes(); resetForm();
+        } catch(e) { alert('儲存失敗！'); }
+        setIsLoading(false);
+    };
 
-            // 圖片壓縮函數 (共用)
-            const compressImage = (file) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.src = event.target.result;
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 800;
-                            let width = img.width;
-                            let height = img.height;
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                            resolve(dataUrl);
-                        };
-                        img.onerror = (err) => reject(err);
-                    };
-                    reader.onerror = (err) => reject(err);
-                });
-            };
+    const deleteRecipe = async (id) => {
+        if (!confirm('確定刪除這個食譜？')) return;
+        setIsLoading(true);
+        try {
+            await window.db_api.delete(id);
+            await loadRecipes(); setSelectedRecipe(null);
+        } catch(e) { alert('刪除失敗'); }
+        setIsLoading(false);
+    };
 
-            // 主圖上傳
-            const handleImageUpload = async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    setProcessingImage(true);
-                    try {
-                        const compressedDataUrl = await compressImage(file);
-                        setImagePreview(compressedDataUrl);
-                        setFormData(prev => ({...prev, image: compressedDataUrl}));
-                    } catch (error) {
-                        console.error("Image processing error", error);
-                        alert("圖片處理失敗");
-                    }
-                    setProcessingImage(false);
-                }
-            };
+    const resetForm = () => {
+        setFormData(emptyForm()); setImagePreview(null);
+        setShowModal(false); setEditMode(false);
+    };
 
-            // 🌟 步驟功能：新增步驟
-            const addStep = () => {
-                setFormData(prev => ({
-                    ...prev,
-                    steps: [...(prev.steps || []), { text: '', image: null }]
-                }));
-            };
+    const openEditModal = (recipe) => {
+        setFormData({
+            name: recipe.name, fbLink: recipe.fbLink,
+            ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients.join('\n') : recipe.ingredients,
+            category: recipe.category || CATEGORIES[0],
+            cookingTime: recipe.cookingTime || '',
+            difficulty: recipe.difficulty || '中等',
+            image: recipe.image || null,
+            steps: recipe.steps || []
+        });
+        setImagePreview(recipe.image || null);
+        setEditMode(true); setSelectedRecipe(recipe); setShowModal(true);
+    };
 
-            // 🌟 步驟功能：刪除步驟
-            const removeStep = (index) => {
-                const newSteps = [...formData.steps];
-                newSteps.splice(index, 1);
-                setFormData(prev => ({ ...prev, steps: newSteps }));
-            };
+    // ── Filter ────────────────────────────────────────────────────────────────
+    const filtered = recipes.filter(r => {
+        const matchCat = activeCategory === '全部' || r.category === activeCategory;
+        const q = searchQuery.toLowerCase();
+        const matchSearch = !q || r.name.toLowerCase().includes(q) ||
+            (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(q)));
+        return matchCat && matchSearch;
+    });
 
-            // 🌟 步驟功能：更新步驟文字
-            const updateStepText = (index, text) => {
-                const newSteps = [...formData.steps];
-                newSteps[index].text = text;
-                setFormData(prev => ({ ...prev, steps: newSteps }));
-            };
+    // ─────────────────────────────────────────────────────────────────────────
+    return (
+        <div style={{ minHeight:'100vh', position:'relative', zIndex:1 }}>
+            {/* Floating decos */}
+            <div className="float-deco" style={{ left:'3%', top:'15%', animationDelay:'0s' }}>🍳</div>
+            <div className="float-deco" style={{ right:'4%', bottom:'18%', animationDelay:'2s' }}>🥘</div>
+            <div className="float-deco" style={{ left:'1%', bottom:'30%', animationDelay:'1s' }}>🌿</div>
 
-            // 🌟 步驟功能：更新步驟圖片 (含壓縮)
-            const updateStepImage = async (index, e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    try {
-                        const compressedDataUrl = await compressImage(file);
-                        const newSteps = [...formData.steps];
-                        newSteps[index].image = compressedDataUrl;
-                        setFormData(prev => ({ ...prev, steps: newSteps }));
-                    } catch (error) {
-                        alert("步驟圖片處理失敗");
-                    }
-                }
-            };
+            {isLoading && <div className="top-loader"/>}
 
-            // 🌟 步驟功能：刪除步驟圖片
-            const removeStepImage = (index) => {
-                const newSteps = [...formData.steps];
-                newSteps[index].image = null;
-                setFormData(prev => ({ ...prev, steps: newSteps }));
-            };
-
-
-            const saveRecipe = async () => {
-                if (!formData.name || !formData.fbLink || !formData.ingredients) {
-                    alert('不可以偷懶喔！請填寫菜名、連結和食材～');
-                    return;
-                }
-                
-                setIsLoading(true);
-                const ingredientsArray = Array.isArray(formData.ingredients) 
-                    ? formData.ingredients 
-                    : formData.ingredients.split('\n').filter(i => i.trim());
-
-                const newRecipe = {
-                    id: editMode ? selectedRecipe.id : Date.now().toString(),
-                    ...formData,
-                    ingredients: ingredientsArray, 
-                    // 確保 steps 存在
-                    steps: formData.steps || [],
-                    timestamp: editMode ? selectedRecipe.timestamp : Date.now()
-                };
-
-                try {
-                    await window.db_api.save(newRecipe);
-                    await loadRecipes();
-                    resetForm();
-                } catch (error) {
-                    console.error(error);
-                    alert('儲存失敗！');
-                }
-                setIsLoading(false);
-            };
-
-            const deleteRecipe = async (id) => {
-                if (confirm('真的要刪除這個食譜嗎？(哭)')) {
-                    setIsLoading(true);
-                    try {
-                        await window.db_api.delete(id);
-                        await loadRecipes();
-                        setSelectedRecipe(null);
-                    } catch (error) {
-                        alert('刪除失敗');
-                    }
-                    setIsLoading(false);
-                }
-            };
-
-            const resetForm = () => {
-                setFormData({
-                    name: '',
-                    fbLink: '',
-                    ingredients: '',
-                    category: categories[0],
-                    cookingTime: '',
-                    difficulty: '中等',
-                    image: null,
-                    steps: [] // 重置步驟
-                });
-                setImagePreview(null);
-                setShowModal(false);
-                setEditMode(false);
-            };
-
-            const openEditModal = (recipe) => {
-                setFormData({
-                    name: recipe.name,
-                    fbLink: recipe.fbLink,
-                    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients.join('\n') : recipe.ingredients,
-                    category: recipe.category || categories[0],
-                    cookingTime: recipe.cookingTime,
-                    difficulty: recipe.difficulty,
-                    image: recipe.image,
-                    steps: recipe.steps || [] // 載入步驟
-                });
-                setImagePreview(recipe.image);
-                setEditMode(true);
-                setSelectedRecipe(recipe);
-                setShowModal(true);
-            };
-
-            const getCategoryColor = (category) => {
-                if (category && category.includes('減脂')) return 'bg-[#e8f5e9] text-[#558b2f] border-[#c8e6c9]';
-                if (category && category.includes('甜')) return 'bg-[#fffde7] text-[#fbc02d] border-[#fff59d]';
-                if (category && category.includes('湯')) return 'bg-[#e0f7fa] text-[#0097a7] border-[#b2ebf2]';
-                return 'bg-[#ffebee] text-[#d32f2f] border-[#ffcdd2]';
-            };
-
-            const getCardGradient = (index) => {
-                const gradients = ['from-[#fff5f7] to-[#fffcf7]', 'from-[#f0f7ff] to-[#fffcf7]', 'from-[#fffbea] to-[#fffcf7]'];
-                return gradients[index % 3];
-            };
-
-            const filteredRecipes = activeCategory === '全部' 
-                ? recipes 
-                : recipes.filter(r => r.category === activeCategory);
-
-            return (
-                <div className="min-h-screen pb-20 font-medium text-[#5c4a4a]">
-                    <div className="fixed top-10 left-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]">🍳</div>
-                    <div className="fixed bottom-20 right-10 text-6xl opacity-10 animate-float-warm select-none pointer-events-none z-0 text-[#8d6e63]" style={{animationDelay: '1s'}}>🥘</div>
-                    
-                    <div className="bg-[#fffcf7]/95 backdrop-blur-sm sticky top-0 z-40 border-b-2 border-[#efebe0] shadow-sm">
-                        <div className="max-w-5xl mx-auto px-6 pt-6 pb-2 relative z-10">
-                            <div className="flex flex-wrap items-center justify-between mb-4 gap-3">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-[#ffe0b2] p-3 rounded-full relative hand-drawn-border">
-                                        <ChefHat className="w-9 h-9 text-[#d84315]" />
-                                        <div className="absolute -top-2 -right-2 text-2xl animate-bounce">⭐</div>
-                                    </div>
-                                    <div>
-                                        <h1 className="text-3xl font-bold tracking-wider title-text text-[#5d4037]">小廚料理手帳</h1>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-[#8d6e63] text-sm font-bold mt-1">記錄專屬的美味回憶 😋</p>
-                                            {isLoading && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded animate-pulse">更新中...</span>}
-                                        </div>
-                                    </div>
-                                </div>
-                                <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-[#ffab91] text-[#5d4037] px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 shrink-0">
-                                    <Plus className="w-6 h-6" />
-                                    <span className="hidden md:inline text-lg">紀錄美食</span>
-                                </button>
+            {/* ═══ HEADER ═══════════════════════════════════════════════════════ */}
+            <header className="header-hero">
+                <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'36px 28px 52px', position:'relative', zIndex:1 }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'16px' }}>
+                        {/* Brand */}
+                        <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+                            <div style={{ background:'rgba(255,255,255,0.12)', backdropFilter:'blur(8px)', borderRadius:'16px', padding:'12px', border:'1.5px solid rgba(255,255,255,0.2)' }}>
+                                <IcoChef size={32} style={{ color:'#f4c97a' }} />
                             </div>
-
-                            <div className="flex flex-wrap gap-2 pb-2 pt-1">
-                                <button onClick={() => setActiveCategory('全部')} className={`px-4 py-2 rounded-full border-2 font-bold transition-all text-sm md:text-base ${activeCategory === '全部' ? 'category-btn-active' : 'bg-[#fff] border-[#efebe0] text-[#8d6e63] hover:bg-[#fff8e1]'}`}>全部</button>
-                                {categories.map(cat => (
-                                    <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full border-2 font-bold transition-all text-sm md:text-base ${activeCategory === cat ? 'category-btn-active' : 'bg-[#fff] border-[#efebe0] text-[#8d6e63] hover:bg-[#fff8e1]'}`}>{cat}</button>
-                                ))}
+                            <div>
+                                <h1 className="font-serif" style={{ fontSize:'1.85rem', fontWeight:900, color:'#fff', letterSpacing:'0.05em', textShadow:'0 2px 12px rgba(0,0,0,0.3)', lineHeight:1.2 }}>小廚料理手帳</h1>
+                                <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.82rem', marginTop:'3px', fontWeight:400 }}>記錄每一道專屬的美味回憶</p>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="max-w-5xl mx-auto px-6 py-8 relative z-10">
-                        {recipes.length === 0 ? (
-                            <div className="text-center py-24 animate-float-warm">
-                                <div className="bg-[#fffdfa]/80 backdrop-blur-sm rounded-[3rem] p-12 inline-block hand-drawn-border">
-                                    <div className="text-8xl mb-6 opacity-80">🍳🥺</div>
-                                    <h3 className="text-2xl text-[#d84315] font-bold mb-3 title-text">還沒有食譜喔...</h3>
-                                    <p className="text-[#8d6e63] text-lg">{isLoading ? '正在從雲端下載食譜...' : '快點紀錄下你的第一道私房菜吧！'}</p>
-                                </div>
+                        {/* Stats + Add button */}
+                        <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                            <div style={{ background:'rgba(255,255,255,0.1)', backdropFilter:'blur(8px)', borderRadius:'12px', padding:'10px 18px', border:'1.5px solid rgba(255,255,255,0.15)', textAlign:'center' }}>
+                                <div className="font-serif" style={{ fontSize:'1.4rem', fontWeight:700, color:'#f4c97a', lineHeight:1 }}>{recipes.length}</div>
+                                <div style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.6)', marginTop:'2px' }}>道食譜</div>
                             </div>
-                        ) : (
-                            <>
-                                {filteredRecipes.length === 0 ? (
-                                    <div className="text-center py-20">
-                                        <p className="text-xl text-[#8d6e63] font-bold">哎呀！「{activeCategory}」分類下還沒有食譜喔 🍜</p>
-                                        <button onClick={() => setActiveCategory('全部')} className="mt-4 text-[#ffab91] underline font-bold">查看全部</button>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                                        {filteredRecipes.map((recipe, index) => (
-                                            <div key={recipe.id} className={`bg-gradient-to-b ${getCardGradient(index)} rounded-[2.5rem] hand-drawn-border cursor-pointer group flex flex-col h-full overflow-hidden relative`} onClick={() => setSelectedRecipe(recipe)}>
-                                                <div className="h-52 relative overflow-hidden m-3 rounded-[2rem] border-2 border-[#efebe0]">
-                                                    {recipe.image ? (
-                                                        <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-[#fff8e1] flex items-center justify-center text-[#d7ccc8]"><span className="text-5xl opacity-50">🍥</span></div>
-                                                    )}
-                                                    <div className="absolute bottom-2 right-2 bg-[#fffcf7] px-2 py-1 rounded-full text-xs border border-[#efebe0] shadow-sm">{recipe.category || '私房料理'}</div>
-                                                </div>
-                                                <div className="px-6 pb-6 pt-3 flex-1 flex flex-col">
-                                                    <h3 className="text-xl font-bold text-[#5d4037] mb-3 group-hover:text-[#d84315] transition-colors line-clamp-1 title-text">{recipe.name}</h3>
-                                                    <div className="flex flex-wrap gap-2 mb-5">
-                                                        <span className={`text-xs px-3 py-1.5 rounded-full border-2 font-bold ${getCategoryColor(recipe.category)}`}>{recipe.category || '未分類'}</span>
-                                                        <span className="bg-[#efebe0] text-[#8d6e63] text-xs px-3 py-1.5 rounded-full border-2 border-[#e0d8c8] font-bold">難度: {recipe.difficulty}</span>
-                                                    </div>
-                                                    <div className="mt-auto pt-4 border-t-2 border-[#efebe0]/60 flex justify-between text-sm text-[#8d6e63] font-bold">
-                                                        <span className="flex items-center gap-1 bg-[#fff8e1] px-2 py-1 rounded-lg">🥕 {recipe.ingredients ? recipe.ingredients.length : 0} 種食材</span>
-                                                        {recipe.cookingTime && <span className="flex items-center gap-1 bg-[#e3f2fd] text-[#42a5f5] px-2 py-1 rounded-lg border border-[#bbdefb]">⏰ {recipe.cookingTime}</span>}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </>
+                            <button className="btn-primary" onClick={() => { resetForm(); setShowModal(true); }} style={{ display:'flex', alignItems:'center', gap:'8px', background:'rgba(255,255,255,0.18)', backdropFilter:'blur(8px)', border:'1.5px solid rgba(255,255,255,0.3)', boxShadow:'0 4px 20px rgba(0,0,0,0.2)', color:'#fff' }}>
+                                <IcoPlus size={18} />
+                                <span style={{ fontFamily:'Noto Sans TC' }}>新增食譜</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            {/* ═══ FILTER BAR ════════════════════════════════════════════════════ */}
+            <div style={{ background:'rgba(253,246,237,0.96)', backdropFilter:'blur(12px)', borderBottom:'1.5px solid #e8d5b0', position:'sticky', top:0, zIndex:40, boxShadow:'0 2px 12px rgba(59,36,9,0.06)' }}>
+                <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'12px 24px' }}>
+                    {/* Search + Category row */}
+                    <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'10px', flexWrap:'wrap' }}>
+                        <div className="search-bar" style={{ flex:'1', minWidth:'180px', maxWidth:'300px' }}>
+                            <span className="search-icon"><IcoSearch size={15}/></span>
+                            <input placeholder="搜尋食譜或食材..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                        </div>
+                        <div style={{ fontSize:'0.8rem', color:'#a07c55', fontWeight:500 }}>
+                            {isLoading ? '載入中...' : `共 ${filtered.length} 道`}
+                        </div>
+                    </div>
+                    {/* Category pills */}
+                    <div style={{ display:'flex', gap:'8px', overflowX:'auto', paddingBottom:'4px' }}>
+                        <button className={`cat-btn ${activeCategory==='全部'?'active':''}`} onClick={()=>setActiveCategory('全部')}>全部</button>
+                        {CATEGORIES.map(c => (
+                            <button key={c} className={`cat-btn ${activeCategory===c?'active':''}`} onClick={()=>setActiveCategory(c)}>
+                                {catEmoji(c)} {c}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* ═══ MAIN CONTENT ══════════════════════════════════════════════════ */}
+            <main style={{ maxWidth:'1100px', margin:'0 auto', padding:'32px 24px 80px', position:'relative', zIndex:1 }}>
+                {recipes.length === 0 ? (
+                    <div className="empty-plate">
+                        <span className="plate-icon">🍽️</span>
+                        <h3 className="font-serif" style={{ fontSize:'1.4rem', fontWeight:700, color:'#8b3a0f', marginBottom:'8px' }}>
+                            {isLoading ? '正在從雲端載入食譜…' : '手帳還是空白的呢'}
+                        </h3>
+                        <p style={{ color:'#a07c55', marginBottom:'24px' }}>快來記錄你的第一道私房菜吧！</p>
+                        {!isLoading && (
+                            <button className="btn-primary" onClick={() => { resetForm(); setShowModal(true); }} style={{ display:'inline-flex', alignItems:'center', gap:'8px' }}>
+                                <IcoPlus size={18} /> 紀錄第一道菜
+                            </button>
                         )}
                     </div>
+                ) : filtered.length === 0 ? (
+                    <div className="empty-plate">
+                        <span className="plate-icon">🔍</span>
+                        <h3 className="font-serif" style={{ fontSize:'1.2rem', fontWeight:700, color:'#8b3a0f', marginBottom:'8px' }}>
+                            找不到相關食譜
+                        </h3>
+                        <p style={{ color:'#a07c55' }}>試試其他關鍵字，或選擇其他分類</p>
+                        <button style={{ marginTop:'16px', color:'#b5541c', background:'none', border:'none', cursor:'pointer', fontWeight:600, textDecoration:'underline' }} onClick={()=>{ setActiveCategory('全部'); setSearchQuery(''); }}>清除篩選</button>
+                    </div>
+                ) : (
+                    <div className="recipes-grid">
+                        {filtered.map(recipe => (
+                            <RecipeCard key={recipe.id} recipe={recipe} onClick={()=>setSelectedRecipe(recipe)} />
+                        ))}
+                    </div>
+                )}
+            </main>
 
-                    {(showModal || selectedRecipe) && (
-                        <div className="fixed inset-0 bg-[#5d4037]/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
-                            <div className="bg-[#fffcf7] rounded-[3rem] max-w-2xl w-full max-h-[88vh] overflow-y-auto hand-drawn-border animate-[float_0.3s_ease-out] relative">
-                                <div className="sticky top-0 bg-[#fffcf7]/95 backdrop-blur-md z-10 px-8 py-6 border-b-2 border-[#efebe0] flex justify-between items-center">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-4xl animate-bounce">{editMode || showModal ? '📝' : '✨'}</span>
-                                        <h2 className="text-3xl font-bold text-[#5d4037] title-text">{showModal ? (editMode ? '修改食譜' : '寫下新食譜') : selectedRecipe.name}</h2>
-                                    </div>
-                                    <button onClick={() => { setShowModal(false); setSelectedRecipe(null); }} className="bg-[#efebe0] hover:bg-[#ffccbc] p-2 rounded-full transition-colors border-2 border-[#e0d8c8] text-[#8d6e63]"><X className="w-7 h-7" /></button>
-                                </div>
-                                <div className="p-8">
-                                    {showModal && (
-                                        <div className="space-y-7">
-                                            {/* 主圖上傳 */}
-                                            <div className="flex justify-center">
-                                                <label className="relative cursor-pointer group w-full">
-                                                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                                                    <div className={`w-full h-72 rounded-[2.5rem] overflow-hidden border-4 border-dashed ${imagePreview ? 'border-transparent' : 'border-[#d7ccc8] bg-[#fbe9e7]'} transition-all flex items-center justify-center relative hover:border-[#ffab91] hover:bg-[#ffccbc]/30`}>
-                                                        {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover opacity-90" /> : <div className="text-center p-10"><Camera className="w-14 h-14 text-[#ffab91] mx-auto mb-4 animate-pulse" /><p className="text-[#d84315] font-bold text-lg">{processingImage ? '正在魔法壓縮中...' : '貼上料理照片！'}</p><p className="text-[#8d6e63] text-sm mt-2">{processingImage ? '✨✨✨' : '會自動幫你縮小照片喔'}</p></div>}
-                                                        {imagePreview && !processingImage && <div className="absolute inset-0 bg-[#5d4037]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-[2.5rem]"><span className="bg-[#fffcf7] px-6 py-3 rounded-full text-lg font-bold shadow-lg text-[#5d4037] hand-drawn-border">更換照片 📸</span></div>}
-                                                    </div>
-                                                </label>
-                                            </div>
-                                            
-                                            <div className="grid gap-5">
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2 ml-3 mr-1"><label className="text-lg font-bold text-[#8d6e63]">菜名 *</label><button onClick={() => convertToTraditional(formData.name, 'name')} className="text-xs bg-white border-2 border-[#ffcdd2] rounded-full px-3 py-1 hover:bg-[#ffebee] text-[#e57373] transition-colors flex items-center gap-1 font-bold shadow-sm active:scale-95"><Sparkles className="w-3 h-3" />簡 ➜ 繁</button></div>
-                                                    <input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-6 py-4 bg-[#fff8e1] border-2 border-[#ffe0b2] focus:border-[#ffab91] rounded-2xl outline-none transition-all font-bold text-[#5d4037] text-lg placeholder-[#d7ccc8]" placeholder="例如：西红柿炒鸡蛋" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-lg font-bold text-[#8d6e63] mb-2 ml-3">Facebook 影片連結 *</label>
-                                                    <input value={formData.fbLink} onChange={(e) => setFormData({...formData, fbLink: e.target.value})} className="w-full px-6 py-4 bg-[#e3f2fd] border-2 border-[#bbdefb] focus:border-[#64b5f6] rounded-2xl outline-none transition-all font-bold text-[#1565c0] placeholder-[#90caf9]" placeholder="https://facebook.com/..." />
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                <div className="relative">
-                                                    <label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">類別 (決定主頁篩選)</label>
-                                                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-5 py-3 bg-[#fff8e1] rounded-xl outline-none border-2 border-[#ffe0b2] cursor-pointer font-bold text-[#5d4037] appearance-none">{categories.map(c => <option key={c} value={c}>{c}</option>)}</select>
-                                                </div>
-                                                <div className="relative"><label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">難度</label><select value={formData.difficulty} onChange={(e) => setFormData({...formData, difficulty: e.target.value})} className="w-full px-5 py-3 bg-[#efebe0] rounded-xl outline-none border-2 border-[#e0d8c8] cursor-pointer font-bold text-[#5d4037] appearance-none">{difficulties.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
-                                                <div><label className="block text-sm font-bold text-[#8d6e63] mb-2 ml-2">時間</label><input value={formData.cookingTime} onChange={(e) => setFormData({...formData, cookingTime: e.target.value})} placeholder="例如 15分鐘" className="w-full px-5 py-3 bg-[#e8f5e9] rounded-xl outline-none border-2 border-[#c8e6c9] font-bold text-[#2e7d32] placeholder-[#a5d6a7] col-span-2 md:col-span-1" /></div>
-                                            </div>
-                                            <div>
-                                                <div className="flex justify-between items-center mb-2 ml-3 mr-1"><label className="text-lg font-bold text-[#8d6e63] flex items-center gap-2">食材清單 * <span className="text-sm bg-[#fff59d] px-2 py-0.5 rounded text-[#f57f17]">記得換行喔！</span></label><button onClick={() => convertToTraditional(formData.ingredients, 'ingredients')} className="text-xs bg-white border-2 border-[#ffcdd2] rounded-full px-3 py-1 hover:bg-[#ffebee] text-[#e57373] transition-colors flex items-center gap-1 font-bold shadow-sm active:scale-95"><Sparkles className="w-3 h-3" />簡 ➜ 繁</button></div>
-                                                <div className="relative">
-                                                    <textarea value={formData.ingredients} onChange={(e) => setFormData({...formData, ingredients: e.target.value})} className="w-full px-6 py-2 bg-[#fffdeb] border-2 border-[#fff59d] focus:border-[#fdd835] rounded-2xl outline-none transition-all min-h-[180px] font-medium text-[#5d4037] placeholder-[#d7ccc8] shadow-inner text-lg" placeholder="拉麵 1份&#10;叉燒 2片&#10;蔥花 適量..." style={{lineHeight: '32px', backgroundImage: 'linear-gradient(transparent 31px, #fff176 31px)', backgroundSize: '100% 32px', backgroundAttachment: 'local', paddingTop: '6px'}}></textarea>
-                                                    <div className="absolute -top-3 right-10 bg-[#ffab91] w-4 h-12 rounded-full border-2 border-[#e64a19] shadow-md -rotate-6 pointer-events-none"></div>
-                                                </div>
-                                            </div>
+            {/* ═══ DETAIL MODAL ══════════════════════════════════════════════════ */}
+            {selectedRecipe && !showModal && (
+                <div className="modal-backdrop" onClick={()=>setSelectedRecipe(null)}>
+                    <div className="modal-box" onClick={e=>e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                                <span style={{ fontSize:'1.5rem' }}>{catEmoji(selectedRecipe.category)}</span>
+                                <h2 className="font-serif" style={{ fontSize:'1.25rem', fontWeight:700, color:'#3b2409' }}>{selectedRecipe.name}</h2>
+                            </div>
+                            <button className="btn-icon" onClick={()=>setSelectedRecipe(null)}><IcoX size={18}/></button>
+                        </div>
+                        <div className="modal-body">
+                            <DetailView recipe={selectedRecipe} onEdit={openEditModal} onDelete={deleteRecipe} />
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                                            {/* 🌟 做法步驟區塊 🌟 */}
-                                            <div>
-                                                <label className="text-lg font-bold text-[#8d6e63] block mb-3">做法步驟 🍳</label>
-                                                <div className="space-y-4">
-                                                    {(formData.steps || []).map((step, index) => (
-                                                        <div key={index} className="bg-[#fff] border-2 border-[#efebe0] rounded-2xl p-4 shadow-sm relative group">
-                                                            <div className="flex items-start gap-3">
-                                                                <span className="bg-[#ffab91] text-[#5d4037] w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">{index + 1}</span>
-                                                                <div className="w-full space-y-3">
-                                                                    <textarea 
-                                                                        value={step.text}
-                                                                        onChange={(e) => updateStepText(index, e.target.value)}
-                                                                        placeholder="輸入步驟說明..."
-                                                                        className="w-full bg-transparent border-none outline-none text-[#5d4037] placeholder-[#d7ccc8] resize-none"
-                                                                        rows="2"
-                                                                    ></textarea>
-                                                                    
-                                                                    {step.image && (
-                                                                        <div className="relative w-full h-40 rounded-xl overflow-hidden border border-[#efebe0]">
-                                                                            <img src={step.image} className="w-full h-full object-cover" />
-                                                                            <button onClick={() => removeStepImage(index)} className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-red-500 transition-colors"><X className="w-4 h-4"/></button>
-                                                                        </div>
-                                                                    )}
-                                                                    
-                                                                    <div className="flex justify-end gap-2">
-                                                                        <label className="cursor-pointer text-[#8d6e63] hover:text-[#ff8a65] transition-colors flex items-center gap-1 text-sm font-bold bg-[#fff8e1] px-3 py-1.5 rounded-lg border border-[#ffe0b2]">
-                                                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => updateStepImage(index, e)} />
-                                                                            <ImageIcon className="w-4 h-4" />
-                                                                            {step.image ? '更換圖片' : '加入圖片'}
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                                <button onClick={() => removeStep(index)} className="text-[#e57373] hover:text-red-500 p-1"><Trash2 className="w-5 h-5"/></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                <button onClick={addStep} className="w-full mt-4 py-3 border-2 border-dashed border-[#d7ccc8] text-[#8d6e63] rounded-2xl font-bold hover:bg-[#fff8e1] hover:border-[#ffe0b2] transition-all flex items-center justify-center gap-2">
-                                                    <Plus className="w-5 h-5" /> 新增步驟
-                                                </button>
-                                            </div>
+            {/* ═══ ADD/EDIT MODAL ════════════════════════════════════════════════ */}
+            {showModal && (
+                <div className="modal-backdrop" onClick={()=>resetForm()}>
+                    <div className="modal-box" onClick={e=>e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                                <span style={{ fontSize:'1.5rem' }}>{editMode ? '✏️' : '📖'}</span>
+                                <h2 className="font-serif" style={{ fontSize:'1.25rem', fontWeight:700, color:'#3b2409' }}>
+                                    {editMode ? '修改食譜' : '記錄新食譜'}
+                                </h2>
+                            </div>
+                            <button className="btn-icon" onClick={resetForm}><IcoX size={18}/></button>
+                        </div>
+                        <div className="modal-body">
+                            <RecipeForm
+                                formData={formData} setFormData={setFormData}
+                                imagePreview={imagePreview}
+                                processingImage={processingImage}
+                                isLoading={isLoading}
+                                editMode={editMode}
+                                handleImageUpload={handleImageUpload}
+                                addStep={addStep} removeStep={removeStep}
+                                updateStepText={updateStepText}
+                                updateStepImage={updateStepImage}
+                                removeStepImage={removeStepImage}
+                                saveRecipe={saveRecipe}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 
-                                            <button onClick={saveRecipe} disabled={isLoading || processingImage} className="w-full bg-[#ffab91] text-[#5d4037] font-bold text-xl py-5 rounded-[2rem] hover:bg-[#ff8a65] transition-all hand-drawn-border active:scale-95 flex items-center justify-center gap-3">
-                                                <span>{editMode ? '修改完成！' : '放入手帳！'}</span><span className="text-2xl animate-bounce">🎉</span>
-                                            </button>
-                                        </div>
-                                    )}
+// ═══════════════════════════════════════════════════════════════════════════════
+// RECIPE CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+function RecipeCard({ recipe, onClick }) {
+    return (
+        <div className="recipe-card" onClick={onClick}>
+            <div className="card-img-wrap">
+                {recipe.image
+                    ? <><img src={recipe.image} alt={recipe.name}/><div className="card-img-overlay"/></>
+                    : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'3rem', color:'#c9995a', opacity:.5 }}>
+                        {catEmoji(recipe.category)}
+                      </div>
+                }
+                {/* Category badge on image */}
+                <div style={{ position:'absolute', top:'10px', left:'10px' }}>
+                    <span className="cat-pill">{catEmoji(recipe.category)} {recipe.category || '私房料理'}</span>
+                </div>
+            </div>
+            <div className="card-body">
+                <div className="card-title">{recipe.name}</div>
+                <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'12px' }}>
+                    <span className={`cat-pill ${diffBadge(recipe.difficulty)}`}>
+                        <IcoFire size={11}/> {recipe.difficulty}
+                    </span>
+                    {recipe.cookingTime && (
+                        <span className="cat-pill" style={{ background:'#e3f0f8', color:'#1565c0', borderColor:'#bbdefb' }}>
+                            <IcoClock size={11}/> {recipe.cookingTime}
+                        </span>
+                    )}
+                </div>
+                <div style={{ borderTop:'1.5px solid #f0e4cc', paddingTop:'10px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                    <span style={{ fontSize:'0.78rem', color:'#a07c55', fontWeight:500 }}>
+                        🥕 {recipe.ingredients ? recipe.ingredients.length : 0} 種食材
+                    </span>
+                    {recipe.steps && recipe.steps.length > 0 && (
+                        <span style={{ fontSize:'0.78rem', color:'#a07c55', fontWeight:500 }}>
+                            📋 {recipe.steps.length} 個步驟
+                        </span>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
-                                    {/* 🌟 檢視模式：顯示步驟 🌟 */}
-                                    {selectedRecipe && !showModal && (
-                                        <div className="space-y-8 relative">
-                                            <div className="absolute -top-6 -left-6 w-20 h-8 bg-[#ffccbc] opacity-50 rotate-[-15deg] pointer-events-none"></div>
-                                            <div className="absolute -top-6 -right-6 w-20 h-8 bg-[#b2dfdb] opacity-50 rotate-[15deg] pointer-events-none"></div>
-                                            {selectedRecipe.image && <div className="rounded-[2.5rem] overflow-hidden hand-drawn-border border-4 border-[#efebe0]"><img src={selectedRecipe.image} className="w-full h-72 object-cover opacity-95" /></div>}
-                                            <div className="flex flex-wrap gap-4 justify-center">
-                                                <span className={`px-5 py-2.5 rounded-full font-bold text-lg border-2 hand-drawn-border ${getCategoryColor(selectedRecipe.category)}`}>🏷️ {selectedRecipe.category}</span>
-                                                <span className="bg-[#efebe0] text-[#8d6e63] px-5 py-2.5 rounded-full font-bold text-lg border-2 border-[#e0d8c8] hand-drawn-border">🔥 難度: {selectedRecipe.difficulty}</span>
-                                                {selectedRecipe.cookingTime && <span className="bg-[#e3f2fd] text-[#1565c0] px-5 py-2.5 rounded-full font-bold text-lg border-2 border-[#bbdefb] hand-drawn-border">⏰ {selectedRecipe.cookingTime}</span>}
-                                            </div>
-                                            
-                                            <div className="bg-[#fffdeb] rounded-[2.5rem] p-8 relative border-2 border-[#fff59d] shadow-[inset_0_0_20px_rgba(255,249,196,0.5)]">
-                                                <div className="absolute -top-5 left-8 bg-[#fdd835] px-4 py-1.5 rounded-full text-lg font-bold text-[#5d4037] border-2 border-[#fbc02d] shadow-sm rotate-[-2deg]">準備材料清單 📝</div>
-                                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">{selectedRecipe.ingredients.map((ing, i) => (<li key={i} className="flex items-center gap-3 bg-[#fffcf7]/80 p-4 rounded-2xl border-2 border-[#ffe0b2]/50 shadow-sm"><span className="text-[#ffab91] text-xl">⭐</span><span className="font-bold text-[#5d4037] text-lg">{ing}</span></li>))}</ul>
-                                            </div>
+// ═══════════════════════════════════════════════════════════════════════════════
+// DETAIL VIEW
+// ═══════════════════════════════════════════════════════════════════════════════
+function DetailView({ recipe, onEdit, onDelete }) {
+    return (
+        <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+            {/* Hero image */}
+            {recipe.image && (
+                <div className="detail-hero">
+                    <img src={recipe.image} alt={recipe.name}/>
+                    <div className="detail-hero-overlay"/>
+                    <div className="detail-hero-title">{recipe.name}</div>
+                </div>
+            )}
 
-                                            {/* 做法步驟顯示區 */}
-                                            {selectedRecipe.steps && selectedRecipe.steps.length > 0 && (
-                                                <div className="bg-[#fff] rounded-[2.5rem] p-8 relative border-2 border-[#eaddca] shadow-sm">
-                                                    <div className="absolute -top-5 right-8 bg-[#ffab91] px-4 py-1.5 rounded-full text-lg font-bold text-[#5d4037] border-2 border-[#ff8a65] shadow-sm rotate-[2deg]">做法步驟 🍳</div>
-                                                    <div className="space-y-6 mt-4">
-                                                        {selectedRecipe.steps.map((step, i) => (
-                                                            <div key={i} className="flex gap-4">
-                                                                <div className="flex flex-col items-center gap-2">
-                                                                    <div className="w-8 h-8 rounded-full bg-[#ffab91] text-[#5d4037] font-bold flex items-center justify-center shrink-0 shadow-sm">{i + 1}</div>
-                                                                    {i !== selectedRecipe.steps.length - 1 && <div className="w-0.5 h-full bg-[#efebe0] rounded-full"></div>}
-                                                                </div>
-                                                                <div className="flex-1 pb-4">
-                                                                    <p className="text-lg text-[#5d4037] leading-relaxed mb-3 font-medium">{step.text}</p>
-                                                                    {step.image && (
-                                                                        <img src={step.image} className="w-full sm:w-2/3 rounded-2xl border-2 border-[#efebe0] shadow-sm" />
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
+            {/* Meta badges */}
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
+                <span className="cat-pill" style={{ fontSize:'0.85rem', padding:'5px 14px' }}>{catEmoji(recipe.category)} {recipe.category}</span>
+                <span className={`cat-pill ${diffBadge(recipe.difficulty)}`} style={{ fontSize:'0.85rem', padding:'5px 14px' }}><IcoFire size={13}/> 難度：{recipe.difficulty}</span>
+                {recipe.cookingTime && (
+                    <span className="cat-pill" style={{ background:'#e3f0f8', color:'#1565c0', borderColor:'#bbdefb', fontSize:'0.85rem', padding:'5px 14px' }}><IcoClock size={13}/> {recipe.cookingTime}</span>
+                )}
+            </div>
 
-                                            <div className="flex flex-col sm:flex-row gap-5 pt-4">
-                                                <a href={selectedRecipe.fbLink} target="_blank" className="flex-1 bg-[#64b5f6] text-white text-center py-4 rounded-[2rem] font-bold text-xl hover:bg-[#42a5f5] transition-all hand-drawn-border flex items-center justify-center gap-3 group"><ExternalLink className="w-7 h-7 group-hover:rotate-12 transition-transform" />看教學影片 📺</a>
-                                                <div className="flex gap-4">
-                                                    <button onClick={() => openEditModal(selectedRecipe)} className="p-4 bg-[#fff176] text-[#f57f17] rounded-[2rem] hover:bg-[#ffee58] transition-colors hand-drawn-border border-[#fdd835]"><Edit2 className="w-8 h-8" /></button>
-                                                    <button onClick={() => deleteRecipe(selectedRecipe.id)} className="p-4 bg-[#ff8a80] text-white rounded-[2rem] hover:bg-[#ff5252] transition-colors hand-drawn-border border-[#e57373]"><Trash2 className="w-8 h-8" /></button>
-                                                </div>
-                                            </div>
-                                        </div>
+            {/* Ingredients */}
+            <div>
+                <div className="section-tag"><IcoBook size={13}/> 準備食材</div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(155px,1fr))', gap:'8px' }}>
+                    {recipe.ingredients.map((ing, i) => (
+                        <div key={i} className="ingredient-item">
+                            <div className="ingredient-dot"/>
+                            <span>{ing}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Steps */}
+            {recipe.steps && recipe.steps.length > 0 && (
+                <div>
+                    <div className="section-tag"><IcoChef size={13}/> 烹飪步驟</div>
+                    <div style={{ padding:'8px 0' }}>
+                        {recipe.steps.map((step, i) => (
+                            <div key={i} className="step-item">
+                                <div className="step-num">{i+1}</div>
+                                <div className="step-content">
+                                    <p style={{ fontSize:'0.93rem', color:'#3b2409', lineHeight:1.7, fontWeight:500 }}>{step.text}</p>
+                                    {step.image && (
+                                        <img src={step.image} style={{ marginTop:'10px', width:'100%', maxWidth:'340px', borderRadius:'12px', border:'1.5px solid #e8d5b0' }} alt={`步驟${i+1}`}/>
                                     )}
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
                 </div>
-            );
-        }
+            )}
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<RecipeManager />);
-    </script>
+            {/* Actions */}
+            <div style={{ display:'flex', gap:'10px', paddingTop:'8px', borderTop:'1.5px solid #ecdcc4', flexWrap:'wrap' }}>
+                <a href={recipe.fbLink} target="_blank" rel="noreferrer"
+                   style={{ flex:1, minWidth:'140px', background:'linear-gradient(135deg,#1877f2,#0d5bba)', color:'#fff', borderRadius:'12px', padding:'12px 18px', fontWeight:700, fontSize:'0.9rem', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 4px 14px rgba(24,119,242,0.3)' }}>
+                    <IcoLink size={16}/> 觀看教學影片
+                </a>
+                <button className="btn-icon" style={{ width:'46px', height:'46px', background:'#fffde7', borderColor:'#ffe082', color:'#f57f17' }} onClick={()=>onEdit(recipe)}><IcoEdit size={18}/></button>
+                <button className="btn-icon" style={{ width:'46px', height:'46px', background:'#fbe9e7', borderColor:'#ffab91', color:'#c62828' }} onClick={()=>onDelete(recipe.id)}><IcoTrash size={18}/></button>
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RECIPE FORM
+// ═══════════════════════════════════════════════════════════════════════════════
+function RecipeForm({ formData, setFormData, imagePreview, processingImage, isLoading, editMode,
+                      handleImageUpload, addStep, removeStep, updateStepText, updateStepImage, removeStepImage, saveRecipe }) {
+
+    const set = (key, val) => setFormData(p => ({ ...p, [key]: val }));
+
+    return (
+        <div style={{ display:'flex', flexDirection:'column', gap:'22px' }}>
+
+            {/* Photo upload */}
+            <div>
+                <label className="form-label">料理照片</label>
+                <label className="img-upload-zone" style={{ cursor:'pointer' }}>
+                    <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display:'none' }}/>
+                    {imagePreview
+                        ? <><img src={imagePreview} alt="preview" style={{ borderRadius:'14px' }}/>
+                            <div className="img-upload-overlay"><span style={{ color:'#fff', fontWeight:700, fontSize:'0.9rem' }}>更換照片 📸</span></div></>
+                        : <div style={{ textAlign:'center' }}>
+                            <IcoCamera size={36} style={{ color:'#c9995a', marginBottom:'10px' }}/>
+                            <div style={{ fontWeight:600, color:'#8b3a0f' }}>{processingImage ? '正在壓縮圖片…' : '點擊上傳照片'}</div>
+                            <div style={{ fontSize:'0.78rem', color:'#a07c55', marginTop:'4px' }}>會自動幫你縮小喔</div>
+                          </div>
+                    }
+                </label>
+            </div>
+
+            {/* Name */}
+            <div>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'7px' }}>
+                    <label className="form-label" style={{ marginBottom:0 }}>菜名 *</label>
+                    <button type="button" className="convert-btn" onClick={()=>toTrad(formData.name, v=>set('name',v))}>
+                        <IcoSparkle size={11}/> 簡 → 繁
+                    </button>
+                </div>
+                <input className="form-input" value={formData.name} placeholder="例如：番茄炒蛋" onChange={e=>set('name',e.target.value)}/>
+            </div>
+
+            {/* FB Link */}
+            <div>
+                <label className="form-label">影片連結 *</label>
+                <input className="form-input" value={formData.fbLink} placeholder="https://facebook.com/..." onChange={e=>set('fbLink',e.target.value)} style={{ color:'#1565c0' }}/>
+            </div>
+
+            {/* Category / Difficulty / Time */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
+                <div>
+                    <label className="form-label">類別</label>
+                    <select className="form-input" value={formData.category} onChange={e=>set('category',e.target.value)} style={{ appearance:'none', cursor:'pointer' }}>
+                        {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="form-label">難度</label>
+                    <select className="form-input" value={formData.difficulty} onChange={e=>set('difficulty',e.target.value)} style={{ appearance:'none', cursor:'pointer' }}>
+                        {DIFFICULTIES.map(d=><option key={d} value={d}>{d}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="form-label">時間</label>
+                    <input className="form-input" value={formData.cookingTime} placeholder="15分鐘" onChange={e=>set('cookingTime',e.target.value)}/>
+                </div>
+            </div>
+
+            {/* Ingredients */}
+            <div>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'7px' }}>
+                    <label className="form-label" style={{ marginBottom:0 }}>食材清單 * <span style={{ fontSize:'0.72rem', background:'#fff9c4', color:'#f57f17', padding:'2px 8px', borderRadius:'4px', fontWeight:600, textTransform:'none', letterSpacing:0 }}>每行一項</span></label>
+                    <button type="button" className="convert-btn" onClick={()=>toTrad(formData.ingredients, v=>set('ingredients',v))}>
+                        <IcoSparkle size={11}/> 簡 → 繁
+                    </button>
+                </div>
+                <textarea className={`form-input notebook-textarea`} rows="7" value={formData.ingredients}
+                    placeholder={"拉麵 1份\n叉燒 2片\n溏心蛋 1隻\n蔥花 適量"} onChange={e=>set('ingredients',e.target.value)}/>
+            </div>
+
+            {/* Steps */}
+            <div>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
+                    <label className="form-label" style={{ marginBottom:0 }}>烹飪步驟</label>
+                    <button type="button" className="btn-ghost" onClick={addStep} style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'0.8rem', padding:'6px 12px' }}>
+                        <IcoPlus size={13}/> 新增步驟
+                    </button>
+                </div>
+                {(!formData.steps || formData.steps.length === 0) && (
+                    <div style={{ textAlign:'center', padding:'24px', borderRadius:'12px', border:'2px dashed #e8d5b0', color:'#c9995a', fontSize:'0.85rem' }}>
+                        點擊「新增步驟」開始填寫做法
+                    </div>
+                )}
+                <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                    {(formData.steps||[]).map((step, i) => (
+                        <div key={i} className="step-form-card">
+                            <div style={{ display:'flex', alignItems:'flex-start', gap:'10px' }}>
+                                <div className="step-num" style={{ marginTop:'2px', flexShrink:0 }}>{i+1}</div>
+                                <div style={{ flex:1 }}>
+                                    <textarea className="form-input" rows="2" value={step.text}
+                                        placeholder="輸入這個步驟的說明…"
+                                        onChange={e=>updateStepText(i,e.target.value)} style={{ marginBottom:'8px' }}/>
+                                    {step.image
+                                        ? <div style={{ position:'relative', marginBottom:'6px' }}>
+                                            <img src={step.image} style={{ width:'100%', borderRadius:'10px', border:'1.5px solid #e8d5b0', maxHeight:'160px', objectFit:'cover' }} alt="step"/>
+                                            <button type="button" onClick={()=>removeStepImage(i)} style={{ position:'absolute', top:'6px', right:'6px', background:'rgba(0,0,0,0.55)', color:'#fff', border:'none', borderRadius:'6px', padding:'4px 6px', cursor:'pointer' }}><IcoX size={13}/></button>
+                                          </div>
+                                        : <label style={{ display:'inline-flex', alignItems:'center', gap:'5px', fontSize:'0.78rem', fontWeight:600, color:'#8b3a0f', background:'var(--parchment)', border:'1.5px solid var(--warm-tan)', borderRadius:'8px', padding:'5px 10px', cursor:'pointer' }}>
+                                            <input type="file" accept="image/*" style={{ display:'none' }} onChange={e=>updateStepImage(i,e)}/>
+                                            <IcoImage size={13}/> 加入圖片
+                                          </label>
+                                    }
+                                </div>
+                                <button type="button" onClick={()=>removeStep(i)} style={{ color:'#e57373', background:'none', border:'none', cursor:'pointer', padding:'4px', marginTop:'2px' }}><IcoTrash size={16}/></button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Save button */}
+            <button type="button" className="btn-primary" onClick={saveRecipe} disabled={isLoading||processingImage}
+                style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', padding:'16px', fontSize:'1.05rem', borderRadius:'16px' }}>
+                {isLoading
+                    ? <><div className="spinner animate-spin"/><span>儲存中…</span></>
+                    : <><IcoBook size={18}/><span>{editMode ? '更新食譜' : '放入手帳 🎉'}</span></>
+                }
+            </button>
+        </div>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<RecipeManager/>);
+</script>
 </body>
 </html>
