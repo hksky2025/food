@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="小廚手帳">
+  <meta name="description" content="記錄你的私房食譜，隨時查閱、計劃、購物">
+  <title>小廚料理手帳</title>
+
+  <!-- ── Stylesheet ──────────────────────────────────────── -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ── Fonts (preload for performance) ────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- ── Favicon ────────────────────────────────────────── -->
+  <link rel="icon"             href="icon.png"  type="image/png">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+
+  <!-- ── React mount point ──────────────────────────────── -->
+  <div id="root"></div>
+
+  <!-- ── External Libraries ─────────────────────────────── -->
+
+  <!-- React 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel (JSX transpiler) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Traditional Chinese converter -->
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.min.js"></script>
+
+  <!-- ── App modules (load order matters) ──────────────── -->
+
+  <!-- 1. Firebase connection -->
+  <script type="module" src="firebase.js"></script>
+
+  <!-- 2. UI Components (registers on window.*) -->
+  <script type="text/babel" src="components.js" data-type="module"></script>
+
+  <!-- 3. Main App (depends on components) -->
+  <script type="text/babel" src="app.js" data-type="module"></script>
+
+</body>
+</html>
