@@ -349,10 +349,10 @@ function App() {
       <nav className="mobile-nav">
         <div className="mobile-nav-inner">
           {[
-            { id:'home',      label:'食譜本',   icon:<I.Home  size={20}/> },
-            { id:'dashboard', label:'統計',     icon:<I.Chart size={20}/> },
-            { id:'shopping',  label:'購物',     icon:<I.Cart  size={20}/> },
-            { id:'calendar',  label:'計劃',     icon:<I.Cal   size={20}/> },
+            { id:'home',      label:'食譜本', icon:<I.Home  size={20}/> },
+            { id:'dashboard', label:'統計',   icon:<I.Chart size={20}/> },
+            { id:'shopping',  label:'購物',   icon:<I.Cart  size={20}/> },
+            { id:'calendar',  label:'計劃',   icon:<I.Cal   size={20}/> },
           ].map(t=>(
             <button key={t.id} className={`mobile-nav-btn ${activeTab===t.id?'active':''}`} onClick={()=>setActiveTab(t.id)}>
               {t.icon} {t.label}

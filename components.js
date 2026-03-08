@@ -35,6 +35,7 @@ window.Icons = {
   ChevL:   (p) => <Ico {...p}><polyline points="15 18 9 12 15 6"/></Ico>,
   ChevR:   (p) => <Ico {...p}><polyline points="9 18 15 12 9 6"/></Ico>,
   Copy:    (p) => <Ico {...p}><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></Ico>,
+  Notes:   (p) => <Ico {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></Ico>,
 };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -138,9 +139,14 @@ window.RecipeCard = function({ recipe, onClick, onToggleFav }) {
         </div>
         <div className="card-footer">
           <span className="card-footer-stat">🥕 {recipe.ingredients?.length || 0} 種食材</span>
-          {recipe.steps?.length > 0 && (
-            <span className="card-footer-stat">📋 {recipe.steps.length} 步驟</span>
-          )}
+          <div style={{display:'flex',gap:'8px'}}>
+            {recipe.steps?.length > 0 && (
+              <span className="card-footer-stat">📋 {recipe.steps.length} 步驟</span>
+            )}
+            {recipe.notes?.length > 0 && (
+              <span className="card-footer-stat">📝 {recipe.notes.length} 筆記</span>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -234,6 +240,9 @@ window.DetailView = function({ recipe, onEdit, onDelete, onAddToCart, onAddToCal
           </div>
         </div>
       )}
+
+      {/* Cooking Notes */}
+      <CookingNotes recipe={recipe} />
 
       {/* Actions */}
       <div style={{display:'flex',gap:'8px',flexWrap:'wrap',paddingTop:'16px',borderTop:'1px solid var(--stone-mid)'}}>
@@ -691,3 +700,116 @@ window.CookingCalendar = function({ recipes, calPlan, setCalPlan }) {
     </div>
   );
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CookingNotes  —  烹飪筆記（嵌入 DetailView 內）
+// 筆記儲存在 recipe.notes[] 陣列，每筆記包含 { id, text, date }
+// ═══════════════════════════════════════════════════════════════════════════════
+function CookingNotes({ recipe }) {
+  const { Icons } = window;
+  const [notes,    setNotes]    = React.useState(recipe.notes || []);
+  const [draft,    setDraft]    = React.useState('');
+  const [saving,   setSaving]   = React.useState(false);
+  const [editId,   setEditId]   = React.useState(null);
+  const [editText, setEditText] = React.useState('');
+  const taRef = React.useRef(null);
+
+  const saveNotes = async (updated) => {
+    setSaving(true);
+    try {
+      await window.db_api.save({ ...recipe, notes: updated });
+      setNotes(updated);
+    } catch { window.showToast('筆記儲存失敗 😢'); }
+    setSaving(false);
+  };
+
+  const addNote = async () => {
+    if (!draft.trim()) return;
+    const newNote = { id: Date.now().toString(), text: draft.trim(), date: new Date().toLocaleDateString('zh-HK') };
+    await saveNotes([newNote, ...notes]);
+    setDraft('');
+    window.showToast('筆記已儲存 📝');
+  };
+
+  const deleteNote = async (id) => {
+    await saveNotes(notes.filter(n => n.id !== id));
+    window.showToast('筆記已刪除');
+  };
+
+  const startEdit = (note) => { setEditId(note.id); setEditText(note.text); };
+  const saveEdit  = async () => {
+    if (!editText.trim()) return;
+    await saveNotes(notes.map(n => n.id === editId ? { ...n, text: editText.trim() } : n));
+    setEditId(null); setEditText('');
+    window.showToast('筆記已更新 ✓');
+  };
+
+  return (
+    <div style={{marginBottom:'20px'}}>
+      <div className="section-tag"><Icons.Notes size={12}/> 烹飪筆記</div>
+
+      {/* Input area */}
+      <div style={{background:'var(--stone)',borderRadius:'var(--radius)',padding:'14px',marginBottom:'12px',border:'1px solid var(--stone-mid)'}}>
+        <textarea
+          ref={taRef}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addNote(); }}
+          placeholder="記錄今次烹飪的心得… (Cmd/Ctrl+Enter 儲存)"
+          rows={3}
+          className="form-input"
+          style={{marginBottom:'10px',background:'var(--white)',fontSize:'0.88rem',resize:'none'}}
+        />
+        <div style={{display:'flex',justifyContent:'flex-end'}}>
+          <button
+            className="btn btn-primary"
+            onClick={addNote}
+            disabled={saving || !draft.trim()}
+            style={{padding:'8px 18px',fontSize:'0.82rem',display:'flex',alignItems:'center',gap:'6px'}}>
+            {saving
+              ? <><div style={{width:13,height:13,border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'#fff',borderRadius:'50%'}} className="animate-spin"/><span>儲存中</span></>
+              : <><Icons.Notes size={13}/><span>記低心得</span></>
+            }
+          </button>
+        </div>
+      </div>
+
+      {/* Notes list */}
+      {notes.length === 0
+        ? <p style={{fontSize:'0.82rem',color:'var(--ink-muted)',textAlign:'center',padding:'12px 0'}}>未有筆記，記錄你第一個心得吧！</p>
+        : <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+            {notes.map(note => (
+              <div key={note.id} style={{background:'var(--white)',borderRadius:'var(--radius)',border:'1px solid var(--stone-mid)',padding:'12px 14px',position:'relative'}}>
+                {editId === note.id
+                  ? <div>
+                      <textarea
+                        className="form-input"
+                        value={editText}
+                        onChange={e=>setEditText(e.target.value)}
+                        rows={3}
+                        style={{marginBottom:'8px',fontSize:'0.88rem',resize:'none'}}
+                        autoFocus
+                      />
+                      <div style={{display:'flex',gap:'6px',justifyContent:'flex-end'}}>
+                        <button className="btn btn-secondary" onClick={()=>setEditId(null)} style={{padding:'5px 12px',fontSize:'0.78rem'}}>取消</button>
+                        <button className="btn btn-primary"   onClick={saveEdit}           style={{padding:'5px 12px',fontSize:'0.78rem'}}>儲存</button>
+                      </div>
+                    </div>
+                  : <>
+                      <p style={{fontSize:'0.88rem',color:'var(--ink-soft)',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:'8px'}}>{note.text}</p>
+                      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                        <span style={{fontSize:'0.7rem',color:'var(--ink-muted)',fontWeight:500}}>📅 {note.date}</span>
+                        <div style={{display:'flex',gap:'4px'}}>
+                          <button className="btn-icon-sq" style={{width:28,height:28,borderRadius:6}} onClick={()=>startEdit(note)}><Icons.Edit size={12}/></button>
+                          <button className="btn-icon-sq" style={{width:28,height:28,borderRadius:6,background:'var(--red-light)',borderColor:'#f0c8c4',color:'var(--red)'}} onClick={()=>deleteNote(note.id)}><Icons.Trash size={12}/></button>
+                        </div>
+                      </div>
+                    </>
+                }
+              </div>
+            ))}
+          </div>
+      }
+    </div>
+  );
+}
